@@ -64,7 +64,7 @@ int MainWindow::execute(QString command, QString parameters, QString &result)   
 {
     QProcess executing;
     executing.setProcessChannelMode(QProcess::MergedChannels);
-    executing.start("mtools -c "+command+" -i "+this->currentFile+" "+parameters);
+    executing.start("mtools -c "+command+" -i \""+this->currentFile+"\" "+parameters);
     executing.waitForFinished();
 
     QString op(executing.readAllStandardOutput());
@@ -95,9 +95,18 @@ int MainWindow::errorMessage(QString text, QString console)
 int MainWindow::prepareDirDump(QString home)
 {
     QString op;
-    int status=this->execute("mdir","-/ -a "+home,op);
+    int status=this->execute("mdir","-/ -a \""+home+"\"",op);
     if (status==0)
     {
+        QString qsattrs;
+        status=this->execute("mattrib","-/ \""+home+"\"",qsattrs);
+        if (status!=0)
+        {
+            //Throw error
+            //Fuck it
+        }
+        QStringList attrs = qsattrs.split('\n');
+
         //QMessageBox::critical(this,"result",op);
         //Parse results
         QStringList lines = op.split('\n');
@@ -107,7 +116,7 @@ int MainWindow::prepareDirDump(QString home)
         this->label=tmp.mid(tmp.indexOf("is")+2);
         tmp=lines[1];
         this->serial=tmp.mid(tmp.indexOf("is")+2);
-        QMessageBox::critical(this,"result",this->label+"\n"+this->serial);
+        //QMessageBox::critical(this,"result",this->label+"\n"+this->serial);
 
         int lineCount=2;
         QString myHome;
@@ -136,7 +145,7 @@ int MainWindow::prepareDirDump(QString home)
             else
             {
                 fileEntry plik;
-                plik.dir=0;
+                plik.attrib="-";
                 QString l=lines[lineCount];
                 plik.name=myHome+l.mid(0,8).trimmed();
                 if (l.mid(9,4).trimmed().length()>0)
@@ -146,7 +155,7 @@ int MainWindow::prepareDirDump(QString home)
                 if (l.mid(13,5)=="<DIR>")
                 {
                     plik.size=0;
-                    plik.dir=1;
+                    plik.attrib="d";
                 }
                 else
                 {
@@ -156,6 +165,18 @@ int MainWindow::prepareDirDump(QString home)
                 if (l.length()>41)  //use lfn
                 {
                     plik.name=myHome+l.mid(42);
+                }
+
+                //This is a VERY BAD routine for attribute getting.
+                //It should be corrected as it's slow.
+                for (int i=0;i<attrs.count();i++)
+                {
+                    if (attrs[i].indexOf(plik.name)>=0)
+                    {
+                        //Parse attribute string
+                        //append attributes like:
+                        //drahs or -----
+                    }
                 }
 
                 this->dirs.append(plik);

@@ -33,7 +33,7 @@ private:
     //structure
     struct fileEntry {
         QString name; //name contains folder.
-        bool dir;
+     //   bool dir;
         unsigned long size;
         QString date;
         QString attrib;
