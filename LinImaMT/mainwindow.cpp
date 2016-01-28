@@ -48,7 +48,7 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionOpen_triggered()
 {
-    if (needsSave)
+    if (needsSave)  //to another function
     {
         //REMEMBER ABOUT SAVING QUESTION!
 
