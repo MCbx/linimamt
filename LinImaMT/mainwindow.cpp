@@ -54,7 +54,7 @@ void MainWindow::on_actionOpen_triggered()
 
     }
     QString fname = QFileDialog::getOpenFileName(this,"Open Image","","Disk Images (*.ima *.dsk *.img);;All files (*.*)");
-    if (fname!="")
+    if (fname!="")  //To be pushed to new function
     {
         this->loadFile(fname);
     }
