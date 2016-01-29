@@ -26,14 +26,43 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //PARSE PARAMETERS!!
 
-    //OTHER INITIALIZATION
+    //MANTLE UI
+    ui->twFileTree->headerItem()->setText(0,"Name");
+    ui->twFileTree->headerItem()->setText(1,"Size");
+    ui->twFileTree->headerItem()->setText(2,"Attribute");
+    ui->twFileTree->headerItem()->setText(3,"Date");
+
+    ui->twFileTree->header()->setSortIndicatorShown(1);
+    ui->twFileTree->header()->setSectionsClickable(1);
+    connect(ui->twFileTree->header(),SIGNAL(sectionClicked(int)),this,SLOT(customSortByColumn(int)));
+    customSortByColumn(ui->twFileTree->header()->sortIndicatorSection());
 
     //START!
 }
 
+
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+//this thing sorts the doirectories always upwards.
+void MainWindow::customSortByColumn(int column)
+{
+    Qt::SortOrder order=ui->twFileTree->header()->sortIndicatorOrder();
+    ui->twFileTree->sortItems(column,order);
+
+    //take directories and push them to the beginning
+    for (int i=0;i<ui->twFileTree->topLevelItemCount();i++)
+    {
+        if (ui->twFileTree->topLevelItem(i)->text(2).at(0)=='D')
+        {
+            QTreeWidgetItem * item = ui->twFileTree->topLevelItem(i);
+            ui->twFileTree->takeTopLevelItem(i);
+            ui->twFileTree->insertTopLevelItem(0,item);
+        }
+    }
+
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -79,17 +108,17 @@ int MainWindow::loadFile(QString fileName)
     this->currentDir="::/";
     //Mantle interface
     this->prepareDirDump(currentDir);
-    //Get information
-
-    //Parse home directory
-
     //Visualize directories
+    this->visualize();
+    return 0;
 }
 
 int MainWindow::errorMessage(QString text, QString console)
 {
 
 }
+
+
 
 //Prepares directory dump and reads them to internal structure
 int MainWindow::prepareDirDump(QString home)
@@ -99,7 +128,7 @@ int MainWindow::prepareDirDump(QString home)
     if (status==0)
     {
         QString qsattrs;
-        status=this->execute("mattrib","-/ \""+home+"\"",qsattrs);
+        status=this->execute("mattrib","-/ -X \""+home+"\"",qsattrs);
         if (status!=0)
         {
             //Throw error
@@ -155,7 +184,7 @@ int MainWindow::prepareDirDump(QString home)
                 if (l.mid(13,5)=="<DIR>")
                 {
                     plik.size=0;
-                    plik.attrib="d";
+                    plik.attrib="D";
                 }
                 else
                 {
@@ -166,16 +195,33 @@ int MainWindow::prepareDirDump(QString home)
                 {
                     plik.name=myHome+l.mid(42);
                 }
-
                 //This is a VERY BAD routine for attribute getting.
                 //It should be corrected as it's slow.
                 for (int i=0;i<attrs.count();i++)
                 {
-                    if (attrs[i].indexOf(plik.name)>=0)
+                    if (attrs[i].endsWith(plik.name,Qt::CaseInsensitive))
                     {
                         //Parse attribute string
                         //append attributes like:
                         //drahs or -----
+                        QString attrString=attrs[i].split(':')[0].trimmed();
+                        if (attrString.contains('A'))
+                            plik.attrib+="a";
+                        else
+                            plik.attrib+="-";
+                        if (attrString.contains('R'))
+                            plik.attrib+="r";
+                        else
+                            plik.attrib+="-";
+                        if (attrString.contains('H'))
+                            plik.attrib+="h";
+                        else
+                            plik.attrib+="-";
+                        if (attrString.contains('S'))
+                            plik.attrib+="s";
+                        else
+                            plik.attrib+="-";
+                       // plik.attrib.endsWith("aaa",Qt::CaseInsensitive)
                     }
                 }
 
@@ -184,12 +230,134 @@ int MainWindow::prepareDirDump(QString home)
             lineCount++;
         }
 
+
     }
+
 //    QString m="";
 //    for (int i=0;i<this->dirs.count();i++)
 //    {
-//        m=m+dirs[i].name+"  "+QString::number(dirs[i].size)+"  "+dirs[i].dir+"  "+dirs[i].date+"\n";
+//        m=m+dirs[i].name+"  "+QString::number(dirs[i].size)+"  "+dirs[i].attrib+"  "+dirs[i].date+"\n";
 //    }
 //    QMessageBox::critical(this,"aaa",m);
     return status;
+}
+
+//visualize tree
+void MainWindow::visualize()
+{
+    //TODO: Save position.
+
+    ui->twDirTree->clear();
+    ui->twFileTree->clear();
+
+    QTreeWidgetItem *treeItem = new QTreeWidgetItem(ui->twDirTree);
+    treeItem->setText(0,"::/");
+    treeItem->setText(1,"::/");
+    treeItem->setIcon(0,QApplication::style()->standardIcon(QStyle::SP_DriveFDIcon));
+    //traverse thru the list and find dirs. These dirs will be added
+    QTreeWidgetItem * former = treeItem;
+    QStringList names;
+    for (int i=0;i<this->dirs.count();i++)
+    {
+        if (this->dirs[i].attrib.at(0)=='D')
+        {
+            names.append(dirs[i].name);
+        }
+    }
+    qSort(names.begin(),names.end());
+
+    for (int i=1;i<names.count();i++)
+    {
+
+        if (names.at(i).contains(names.at(i-1)))
+            names[i-1]="";
+    }
+
+    for (int i=0;i<names.count();i++)
+    {
+        former=treeItem;
+        QStringList folders=names[i].split('/');
+        for (int j=1;j<folders.count();j++)
+        {
+            QTreeWidgetItem * sub = new QTreeWidgetItem();
+            sub->setText(0,folders.at(j));
+          //  sub->setText(1,names[i]);
+            sub->setIcon(0,QApplication::style()->standardIcon(QStyle::SP_DirClosedIcon));
+            if (ui->twDirTree->findItems(names[i],Qt::MatchContains,1).count()==0)
+            {
+                former->addChild(sub);
+                former=sub;
+            }
+        }
+    }
+    ui->twDirTree->expandItem(treeItem);
+
+    //TODO: Restore selected things as were.
+}
+
+void MainWindow::on_twDirTree_currentItemChanged(QTreeWidgetItem *current)
+{
+    ui->twFileTree->clear();
+    //determine path
+    QString path;
+    QTreeWidgetItem *iterate=current;
+    while(iterate->parent()!=NULL)
+    {
+        path=iterate->text(0)+"/"+path;
+        iterate=iterate->parent();
+    }
+    path="::/"+path;
+    //QMessageBox::critical(this,"sss",path);
+
+    //visualize files
+    for (int i=0;i<dirs.count();i++)
+    {
+        if ((dirs[i].name.startsWith(path))&&
+                (!dirs[i].name.mid(path.length()).contains("/")))   //when we have file not in subdir
+        {
+            QTreeWidgetItem * entry = new QTreeWidgetItem(ui->twFileTree);
+            entry->setText(0,dirs[i].name.split('/').last());
+            entry->setText(1,QString::number(dirs[i].size));
+            entry->setText(2,dirs[i].attrib);
+            entry->setText(3,dirs[i].date);
+            entry->setText(4,dirs[i].name);
+            if (dirs[i].attrib.at(0)=='D')
+                entry->setIcon(0,QApplication::style()->standardIcon(QStyle::SP_DirClosedIcon));
+            else
+                entry->setIcon(0,QApplication::style()->standardIcon(QStyle::SP_FileIcon));
+
+        }
+    }
+    customSortByColumn(ui->twFileTree->header()->sortIndicatorSection());
+    return;
+}
+
+void MainWindow::on_twFileTree_itemDoubleClicked(QTreeWidgetItem *item)
+{
+    if (item->text(2).at(0)=='D')
+    {
+        //go to tree position
+        ui->twDirTree->expandItem(ui->twDirTree->topLevelItem(0));
+        QTreeWidgetItem * myItem=ui->twDirTree->topLevelItem(0);
+        QStringList parts=item->text(4).split('/');
+        for (int i=1;i<parts.count();i++)
+        {
+            for (int j=0;j<myItem->childCount();j++)
+            {
+                if (myItem->child(j)->text(0)==parts[i])
+                {
+                    ui->twDirTree->expandItem(myItem->child(j));
+                    myItem=myItem->child(j);
+                    break;
+                }
+            }
+        }
+        //click it.
+        ui->twDirTree->clearSelection();
+        myItem->setSelected(1);
+        this->on_twDirTree_currentItemChanged(myItem);
+
+    }
+
+        //TODO: File double-click
 }

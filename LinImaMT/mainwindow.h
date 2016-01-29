@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QProcess>
+#include <QTreeWidgetItem>
 
 namespace Ui {
 class MainWindow;
@@ -20,6 +21,12 @@ private slots:
     void on_actionExit_triggered();
 
     void on_actionOpen_triggered();
+
+    void on_twDirTree_currentItemChanged(QTreeWidgetItem *current);
+
+    void customSortByColumn(int column);
+
+    void on_twFileTree_itemDoubleClicked(QTreeWidgetItem *item);
 
 private:
     Ui::MainWindow *ui;
@@ -45,7 +52,7 @@ private:
     int loadFile(QString fileName);
     int prepareDirDump(QString home);
     int errorMessage(QString text, QString console);
-
+    void visualize();
 
 };
 
