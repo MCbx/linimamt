@@ -28,6 +28,11 @@ private slots:
 
     void on_twFileTree_itemDoubleClicked(QTreeWidgetItem *item);
 
+    void on_actionGoUp_triggered();
+
+    void on_actionAddress_bar_triggered();
+    void on_label_edit();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;
@@ -54,6 +59,9 @@ private:
     int errorMessage(QString text, QString console);
     void visualize();
 
+    //ui components
+    QLineEdit * leAddress;
+    QLineEdit * leLabel;
 };
 
 #endif // MAINWINDOW_H

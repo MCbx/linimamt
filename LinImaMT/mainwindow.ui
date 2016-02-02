@@ -130,11 +130,14 @@
     <property name="title">
      <string>Tools</string>
     </property>
+    <addaction name="actionAddress_bar"/>
+    <addaction name="actionVolume"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImage"/>
@@ -186,6 +189,27 @@
    </property>
    <property name="toolTip">
     <string>Goes to higher directory</string>
+   </property>
+  </action>
+  <action name="actionAddress_bar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Address bar</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionVolume">
+   <property name="text">
+    <string>Volume...</string>
    </property>
   </action>
  </widget>

@@ -4,6 +4,10 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QStringList>
+#include <QLineEdit>
+#include <QWidgetAction>
+#include <QProgressBar>
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -36,6 +40,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->twFileTree->header()->setSectionsClickable(1);
     connect(ui->twFileTree->header(),SIGNAL(sectionClicked(int)),this,SLOT(customSortByColumn(int)));
     customSortByColumn(ui->twFileTree->header()->sortIndicatorSection());
+    //addres bar
+    leAddress = new QLineEdit(ui->tbAddressBar);
+    ui->tbAddressBar->addWidget(leAddress);
+    leAddress->setReadOnly(1);
+
+    //label editor
+    leLabel = new QLineEdit("",ui->menuBar);
+    ui->menuBar->setCornerWidget(leLabel);
+    connect(leLabel,SIGNAL(editingFinished()),this,SLOT(on_label_edit()));
+
 
     //START!
 }
@@ -44,6 +58,12 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+//edit label
+void MainWindow::on_label_edit()
+{
+    this->label=this->leLabel->text();
 }
 
 //this thing sorts the doirectories always upwards.
@@ -102,6 +122,7 @@ int MainWindow::execute(QString command, QString parameters, QString &result)   
     return executing.exitCode();
 }
 
+//load file
 int MainWindow::loadFile(QString fileName)
 {
     this->currentFile=fileName;
@@ -113,12 +134,11 @@ int MainWindow::loadFile(QString fileName)
     return 0;
 }
 
+//throw error message
 int MainWindow::errorMessage(QString text, QString console)
 {
 
 }
-
-
 
 //Prepares directory dump and reads them to internal structure
 int MainWindow::prepareDirDump(QString home)
@@ -291,7 +311,7 @@ void MainWindow::visualize()
         }
     }
     ui->twDirTree->expandItem(treeItem);
-
+    this->leLabel->setText(this->label);
     //TODO: Restore selected things as were.
 }
 
@@ -307,6 +327,7 @@ void MainWindow::on_twDirTree_currentItemChanged(QTreeWidgetItem *current)
         iterate=iterate->parent();
     }
     path="::/"+path;
+    this->leAddress->setText(path);
     //QMessageBox::critical(this,"sss",path);
 
     //visualize files
@@ -355,9 +376,33 @@ void MainWindow::on_twFileTree_itemDoubleClicked(QTreeWidgetItem *item)
         //click it.
         ui->twDirTree->clearSelection();
         myItem->setSelected(1);
+        ui->twDirTree->setCurrentItem(myItem);
         this->on_twDirTree_currentItemChanged(myItem);
 
     }
 
         //TODO: File double-click
+}
+
+//Up button
+void MainWindow::on_actionGoUp_triggered()
+{
+    if (this->leAddress->text()=="::/")
+    {
+        return;
+    }
+    ui->twDirTree->setCurrentItem(ui->twDirTree->currentItem()->parent());
+}
+
+//toggle address bar visibility
+void MainWindow::on_actionAddress_bar_triggered()
+{
+    if (ui->actionAddress_bar->isChecked())
+    {
+        ui->tbAddressBar->setVisible(1);
+    }
+    else
+    {
+        ui->tbAddressBar->setVisible(0);
+    }
 }
