@@ -7,6 +7,7 @@
 #include <QLineEdit>
 #include <QWidgetAction>
 #include <QProgressBar>
+#include <QToolBar>
 
 
 MainWindow::MainWindow(QWidget *parent) :
