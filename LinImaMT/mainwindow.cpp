@@ -8,6 +8,7 @@
 #include <QWidgetAction>
 #include <QProgressBar>
 #include <QToolBar>
+#include "errordialog.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -132,128 +133,151 @@ int MainWindow::loadFile(QString fileName)
     this->prepareDirDump(currentDir);
     //Visualize directories
     this->visualize();
+    ui->twDirTree->setCurrentItem(ui->twDirTree->topLevelItem(0));  //select first item. Do not remove this.
     return 0;
 }
 
 //throw error message
 int MainWindow::errorMessage(QString text, QString console)
 {
-
+    ErrorDialog * a = new ErrorDialog(this,text,console);
+    a->show();
+    return 0;
 }
 
 //Prepares directory dump and reads them to internal structure
 int MainWindow::prepareDirDump(QString home)
 {
+    this->freeSpace=0;
+    this->usedSpace=0;
     QString op;
     int status=this->execute("mdir","-/ -a \""+home+"\"",op);
-    if (status==0)
+    if (status!=0)
     {
-        QString qsattrs;
-        status=this->execute("mattrib","-/ -X \""+home+"\"",qsattrs);
-        if (status!=0)
+        errorMessage("Failed to acquire listing, code: "+QString::number(status),op);
+        return 1;
+    }
+
+    QString qsattrs;
+    status=this->execute("mattrib","-/ -X \""+home+"\"",qsattrs);
+    if (status!=0)
+    {
+        errorMessage("Failed to acquire attributes, code: "+QString::number(status),qsattrs);
+        return 1;
+    }
+    QStringList attrs = qsattrs.split('\n');
+
+    //QMessageBox::critical(this,"result",op);
+    //Parse results
+    QStringList lines = op.split('\n');
+
+    //volume label and serial
+    QString tmp=lines[0];
+    this->label=tmp.mid(tmp.indexOf("is")+2);
+    tmp=lines[1];
+    this->serial=tmp.mid(tmp.indexOf("is")+2);
+    //QMessageBox::critical(this,"result",this->label+"\n"+this->serial);
+
+    int lineCount=2;
+    QString myHome;
+    this->dirs.clear();
+    while (lineCount<lines.count())
+    {
+        if ((lines[lineCount].length()==0)||(lines[lineCount].indexOf("files       ")>0)||
+                (lines[lineCount].indexOf(".            <DIR>")>=0)||
+                   (lines[lineCount].indexOf("..           <DIR>")>=0))
         {
-            //Throw error
-            //Fuck it
+            lineCount++;
+            continue;
         }
-        QStringList attrs = qsattrs.split('\n');
-
-        //QMessageBox::critical(this,"result",op);
-        //Parse results
-        QStringList lines = op.split('\n');
-
-        //volume label and serial
-        QString tmp=lines[0];
-        this->label=tmp.mid(tmp.indexOf("is")+2);
-        tmp=lines[1];
-        this->serial=tmp.mid(tmp.indexOf("is")+2);
-        //QMessageBox::critical(this,"result",this->label+"\n"+this->serial);
-
-        int lineCount=2;
-        QString myHome;
-        this->dirs.clear();
-        while (lineCount<lines.count())
+        if (lines[lineCount].indexOf("Total files listed:")>=0)
         {
-            if ((lines[lineCount].length()==0)||(lines[lineCount].indexOf("files       ")>0)||
-                    (lines[lineCount].indexOf(".            <DIR>")>=0)||
-                       (lines[lineCount].indexOf("..           <DIR>")>=0))
+
+            QString a=lines[lineCount+2];
+            a=a.replace("bytes free","").trimmed();
+            a=a.replace(" ","");
+            this->freeSpace=a.toInt();
+            break;
+        }
+        if (lines[lineCount].indexOf("bytes free")>=0)
+        {
+            QString a=lines[lineCount];
+            a=a.replace("bytes free","").trimmed();
+            a=a.replace(" ","");
+            this->freeSpace=a.toInt();
+            break;
+        }
+        if (lines[lineCount].indexOf("Directory for")>=0)
+        {
+            myHome=lines[lineCount].mid(lines[lineCount].indexOf("Directory for")+14);
+            if (myHome.at(myHome.length()-1)!='/')
             {
-                lineCount++;
-                continue;
+                myHome+='/';
             }
-            if (lines[lineCount].indexOf("Total files listed:")>=0)
+        }
+        else
+        {
+            fileEntry plik;
+            plik.attrib="-";
+            QString l=lines[lineCount];
+            plik.name=myHome+l.mid(0,8).trimmed();
+            if (l.mid(9,4).trimmed().length()>0)
             {
-                break;
+                plik.name+="."+l.mid(9,4).trimmed();
             }
-            if (lines[lineCount].indexOf("Directory for")>=0)
+            if (l.mid(13,5)=="<DIR>")
             {
-                myHome=lines[lineCount].mid(lines[lineCount].indexOf("Directory for")+14);
-                if (myHome.at(myHome.length()-1)!='/')
-                {
-                    myHome+='/';
-                }
+                plik.size=0;
+                plik.attrib="D";
             }
             else
             {
-                fileEntry plik;
-                plik.attrib="-";
-                QString l=lines[lineCount];
-                plik.name=myHome+l.mid(0,8).trimmed();
-                if (l.mid(9,4).trimmed().length()>0)
-                {
-                    plik.name+="."+l.mid(9,4).trimmed();
-                }
-                if (l.mid(13,5)=="<DIR>")
-                {
-                    plik.size=0;
-                    plik.attrib="D";
-                }
-                else
-                {
-                    plik.size=l.mid(13,9).trimmed().toInt();
-                }
-                plik.date=l.mid(23,17);
-                if (l.length()>41)  //use lfn
-                {
-                    plik.name=myHome+l.mid(42);
-                }
-                //This is a VERY BAD routine for attribute getting.
-                //It should be corrected as it's slow.
-                for (int i=0;i<attrs.count();i++)
-                {
-                    if (attrs[i].endsWith(plik.name,Qt::CaseInsensitive))
-                    {
-                        //Parse attribute string
-                        //append attributes like:
-                        //drahs or -----
-                        QString attrString=attrs[i].split(':')[0].trimmed();
-                        if (attrString.contains('A'))
-                            plik.attrib+="a";
-                        else
-                            plik.attrib+="-";
-                        if (attrString.contains('R'))
-                            plik.attrib+="r";
-                        else
-                            plik.attrib+="-";
-                        if (attrString.contains('H'))
-                            plik.attrib+="h";
-                        else
-                            plik.attrib+="-";
-                        if (attrString.contains('S'))
-                            plik.attrib+="s";
-                        else
-                            plik.attrib+="-";
-                       // plik.attrib.endsWith("aaa",Qt::CaseInsensitive)
-                    }
-                }
-
-                this->dirs.append(plik);
+                plik.size=l.mid(13,9).trimmed().toInt();
             }
-            lineCount++;
+            plik.date=l.mid(23,17);
+            if (l.length()>41)  //use lfn
+            {
+                plik.name=myHome+l.mid(42);
+            }
+            //This is a VERY BAD routine for attribute getting.
+            //It should be corrected as it's slow.
+            for (int i=0;i<attrs.count();i++)
+            {
+                if (attrs[i].endsWith(plik.name,Qt::CaseInsensitive))
+                {
+                    //Parse attribute string
+                    //append attributes like:
+                    //drahs or -----
+                    QString attrString=attrs[i].split(':')[0].trimmed();
+                    if (attrString.contains('A'))
+                        plik.attrib+="a";
+                    else
+                        plik.attrib+="-";
+                    if (attrString.contains('R'))
+                        plik.attrib+="r";
+                    else
+                        plik.attrib+="-";
+                    if (attrString.contains('H'))
+                        plik.attrib+="h";
+                    else
+                        plik.attrib+="-";
+                    if (attrString.contains('S'))
+                        plik.attrib+="s";
+                    else
+                        plik.attrib+="-";
+                   // plik.attrib.endsWith("aaa",Qt::CaseInsensitive)
+                }
+            }
+
+            this->dirs.append(plik);
         }
-
-
+        lineCount++;
     }
 
+    for (int i=0;i<this->dirs.count();i++)
+    {
+        this->usedSpace+=dirs[i].size;
+    }
 //    QString m="";
 //    for (int i=0;i<this->dirs.count();i++)
 //    {
@@ -313,11 +337,22 @@ void MainWindow::visualize()
     }
     ui->twDirTree->expandItem(treeItem);
     this->leLabel->setText(this->label);
+
+    ui->statusBar->showMessage(QString::number(this->usedSpace+this->freeSpace)+" bytes, "+QString::number(this->freeSpace)+" bytes free");
+
     //TODO: Restore selected things as were.
 }
 
 void MainWindow::on_twDirTree_currentItemChanged(QTreeWidgetItem *current)
 {
+    if (ui->twDirTree->topLevelItemCount()==0)
+    {
+        return;
+    }
+    if (current==0)
+    {
+        return;
+    }
     ui->twFileTree->clear();
     //determine path
     QString path;

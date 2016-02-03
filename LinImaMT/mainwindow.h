@@ -41,6 +41,8 @@ private:
     QString currentDir;
     QString label;
     QString serial;
+    unsigned int freeSpace;
+    unsigned int usedSpace;
 
     //structure
     struct fileEntry {
