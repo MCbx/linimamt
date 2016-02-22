@@ -24,6 +24,7 @@
 // Label, serial editing
 // Boot sector preferences
 // Save preferences, window sizes etc.
+// Command-line parameters
 
 
 MainWindow::MainWindow(QWidget *parent) :
