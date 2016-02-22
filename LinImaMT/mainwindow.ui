@@ -64,6 +64,15 @@
        </column>
       </widget>
       <widget class="QTreeWidget" name="twFileTree">
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <property name="itemsExpandable">
+        <bool>false</bool>
+       </property>
        <property name="sortingEnabled">
         <bool>false</bool>
        </property>

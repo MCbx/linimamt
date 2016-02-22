@@ -62,7 +62,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-//edit label
+//edit label TODO: Mark as "to save".
 void MainWindow::on_label_edit()
 {
     this->label=this->leLabel->text();
@@ -105,12 +105,16 @@ void MainWindow::on_actionOpen_triggered()
 
     }
     QString fname = QFileDialog::getOpenFileName(this,"Open Image","","Disk Images (*.ima *.dsk *.img);;All files (*.*)");
-    if (fname!="")  //To be pushed to new function
+    if (fname!="")
     {
+        ui->statusBar->showMessage("Loading file ...");
+        QApplication::processEvents();
         this->loadFile(fname);
+        //we don't need to refresh status bar as it has been done with visualization
     }
 }
 
+//execute mtools with specific command on currently loaded image.
 int MainWindow::execute(QString command, QString parameters, QString &result)       //TO BE PORTED
 {
     QProcess executing;
@@ -287,7 +291,7 @@ int MainWindow::prepareDirDump(QString home)
     return status;
 }
 
-//visualize tree
+//visualize trees
 void MainWindow::visualize()
 {
     //TODO: Save position.
@@ -338,11 +342,11 @@ void MainWindow::visualize()
     ui->twDirTree->expandItem(treeItem);
     this->leLabel->setText(this->label);
 
-    ui->statusBar->showMessage(QString::number(this->usedSpace+this->freeSpace)+" bytes, "+QString::number(this->freeSpace)+" bytes free");
-
+    this->statusBarNormal();
     //TODO: Restore selected things as were.
 }
 
+//change directory
 void MainWindow::on_twDirTree_currentItemChanged(QTreeWidgetItem *current)
 {
     if (ui->twDirTree->topLevelItemCount()==0)
@@ -386,9 +390,11 @@ void MainWindow::on_twDirTree_currentItemChanged(QTreeWidgetItem *current)
         }
     }
     customSortByColumn(ui->twFileTree->header()->sortIndicatorSection());
+    this->statusBarNormal();
     return;
 }
 
+//doubleckick item in file list
 void MainWindow::on_twFileTree_itemDoubleClicked(QTreeWidgetItem *item)
 {
     if (item->text(2).at(0)=='D')
@@ -441,4 +447,44 @@ void MainWindow::on_actionAddress_bar_triggered()
     {
         ui->tbAddressBar->setVisible(0);
     }
+}
+
+//Displays normal designation on status bar
+//Normal designation shows items/selected items count, bytes and free space.
+//Contrary to "working designation" when computer is doing sth.
+void MainWindow::statusBarNormal()
+{
+   QString sb="";
+   unsigned int si=0;
+
+   //if items selected
+   if (ui->twFileTree->selectedItems().count()>0)
+   {
+        int i;
+        for (i=0;i<ui->twFileTree->selectedItems().count();i++)
+        {
+            si+=ui->twFileTree->selectedItems().at(i)->text(1).toInt();
+        }
+        sb+="Selected "+QString::number(i)+" item/s, occupying "+QString::number(si)+"B";
+   }
+   else
+   {
+       QTreeWidgetItemIterator it(ui->twFileTree);
+       while (*it)
+       {
+        si+=(*it)->text(1).toInt();
+        ++it;
+       }
+       sb+=QString::number(ui->twFileTree->topLevelItemCount())+" item/s, occupying "+QString::number(si)+"B";
+   }
+   sb+=" ("+QString::number(this->freeSpace)+"B free)";
+
+   ui->statusBar->showMessage(sb);
+}
+
+//if we changed selection, refresh status bar.
+//This poses an intentional "breaker" for some processes.
+void MainWindow::on_twFileTree_itemSelectionChanged()
+{
+    this->statusBarNormal();
 }

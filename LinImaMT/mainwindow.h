@@ -33,6 +33,8 @@ private slots:
     void on_actionAddress_bar_triggered();
     void on_label_edit();
 
+    void on_twFileTree_itemSelectionChanged();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;
@@ -60,6 +62,7 @@ private:
     int prepareDirDump(QString home);
     int errorMessage(QString text, QString console);
     void visualize();
+    void statusBarNormal();
 
     //ui components
     QLineEdit * leAddress;
