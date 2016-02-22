@@ -11,6 +11,21 @@
 #include "errordialog.h"
 
 
+
+//////// MEMENTO ////////
+//      TODO LIST      //
+// Extract files/dirs
+// Save-enable making copy in temp dir (in first change)
+// Add files/dirs
+// Delete files/dirs
+// New image
+// Save image
+// Drag-drop
+// Label, serial editing
+// Boot sector preferences
+// Save preferences, window sizes etc.
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
