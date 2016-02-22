@@ -25,7 +25,9 @@
 // Boot sector preferences
 // Save preferences, window sizes etc.
 // Command-line parameters
-
+//Rename in image
+//Move in image
+//Copy in image
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
