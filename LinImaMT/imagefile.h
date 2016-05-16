@@ -19,7 +19,7 @@ public:
     ImageFile(QString imagePath); //open existing
   //  ImageFile(int imageSize);   //create new
    // int copyFiles(QList<QString> sources, QString destination);
-  //  int moveFiles(QList<QString> sources, QString destination);
+      int moveFile(QString source, QString destination);
    // int deleteFiles(QList<QString> sources);
    // int makeFolder(QString path);
     QList<fileEntry> getContents(QString home);              //return contents for visualization

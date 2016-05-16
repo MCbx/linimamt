@@ -186,6 +186,24 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
         return dirs;
 }
 
+int ImageFile::moveFile(QString source, QString destination)
+{
+    this->prepareForModify();
+    QString op;
+    if ((destination.contains("\\..\\"))||(destination.contains("/../")))
+    {
+        errorMessage("Internal error","Relative path passed");
+        return 2;
+    }
+    int status=this->execute("mren"," \""+source+"\" \""+destination+"\"",op);
+    if (status!=0)
+    {
+        errorMessage("Failed to rename. Code "+QString::number(status),op);
+        return 1;
+    }
+    this->modified=1;
+    return 0;
+}
 
 
 //execute mtools with specific command on currently loaded image.

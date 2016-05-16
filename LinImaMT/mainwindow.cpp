@@ -9,6 +9,7 @@
 #include <QProgressBar>
 #include <QToolBar>
 #include <QFontDatabase>
+#include <QInputDialog>
 #include "errordialog.h"
 
 
@@ -383,6 +384,14 @@ void MainWindow::statusBarNormal()
    }
    sb+=" ("+decNumber(this->img->getFreeSpace())+"B free)";
 
+   if (ui->twFileTree->selectedItems().count()==1)
+   {
+       ui->actionRename->setEnabled(1);
+   }
+   else
+   {
+       ui->actionRename->setEnabled(0);
+   }
    ui->statusBar->showMessage(sb);
 }
 
@@ -411,4 +420,31 @@ void MainWindow::on_actionSave_triggered()
 {
     this->img->saveFile("");
     visualizeModified();
+}
+
+void MainWindow::on_actionRename_triggered()
+{
+    //get path of source
+    QString fileName=ui->twFileTree->selectedItems().at(0)->text(0);
+    QString source=this->leAddress->text()+fileName;
+    bool dialogResult;
+    QInputDialog *renameDialog = new QInputDialog();
+
+    //show user some fancy thing
+    QString destination = renameDialog->getText(0, "Rename", "New name:", QLineEdit::Normal,
+                                           fileName, &dialogResult);
+    if ((destination.length()==0)||(!dialogResult)||(destination==fileName))
+    {
+        return;
+    }
+    destination=this->leAddress->text()+destination;
+    //rename
+    this->img->moveFile(source,destination);
+
+    //refresh
+    this->dirs=this->img->getContents(currentDir);
+    //Visualize directories
+    this->visualize();
+    visualizeModified();
+    return;
 }
