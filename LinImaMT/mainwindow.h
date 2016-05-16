@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QProcess>
 #include <QTreeWidgetItem>
+#include "imagefile.h"
 
 namespace Ui {
 class MainWindow;
@@ -35,26 +36,19 @@ private slots:
 
     void on_twFileTree_itemSelectionChanged();
 
+    void on_actionSave_As_triggered();
+
+    void on_actionSave_triggered();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;
-    bool needsSave;
     QString currentFile;
     QString currentDir;
-    QString label;
-    QString serial;
-    unsigned int freeSpace;
-    unsigned int usedSpace;
+    ImageFile * img;
 
     //structure
-    struct fileEntry {
-        QString name; //name contains folder.
-     //   bool dir;
-        unsigned long size;
-        QString date;
-        QString attrib;
-    };
-    QList<fileEntry>dirs;
+    QList<ImageFile::fileEntry>dirs;
 
     //functions
     int execute(QString command, QString parameters, QString & result);
@@ -63,6 +57,7 @@ private:
     int errorMessage(QString text, QString console);
     void visualize();
     void statusBarNormal();
+    void visualizeModified();
 
     //ui components
     QLineEdit * leAddress;

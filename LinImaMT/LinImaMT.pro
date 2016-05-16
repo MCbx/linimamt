@@ -14,10 +14,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    errordialog.cpp
+    errordialog.cpp \
+    imagefile.cpp
 
 HEADERS  += mainwindow.h \
-    errordialog.h
+    errordialog.h \
+    imagefile.h
 
 FORMS    += mainwindow.ui \
     errordialog.ui

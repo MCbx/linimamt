@@ -8,6 +8,7 @@
 #include <QWidgetAction>
 #include <QProgressBar>
 #include <QToolBar>
+#include <QFontDatabase>
 #include "errordialog.h"
 
 
@@ -15,14 +16,13 @@
 //////// MEMENTO ////////
 //      TODO LIST      //
 // Extract files/dirs
-// Save-enable making copy in temp dir (in first change)
 // Add files/dirs
 // Delete files/dirs
 // New image
-// Save image
 // Drag-drop
-// Label, serial editing
+// serial editing
 // Boot sector preferences
+//New folder
 // Save preferences, window sizes etc.
 // Command-line parameters
 //Rename in image
@@ -34,7 +34,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->needsSave=0;
     //VERIFY EXISTENCE OF MTOOLS!
     this->process=new QProcess(this);   //TO BE PORTED
   //  this->process=new QProcess(this);
@@ -68,10 +67,13 @@ MainWindow::MainWindow(QWidget *parent) :
     //label editor
     leLabel = new QLineEdit("",ui->menuBar);
     ui->menuBar->setCornerWidget(leLabel);
+    leLabel->setMaxLength(11);
+    leLabel->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    leLabel->setEnabled(0);
     connect(leLabel,SIGNAL(editingFinished()),this,SLOT(on_label_edit()));
 
-
-    //START!
+    this->img=NULL;
+    //START application
 }
 
 
@@ -80,10 +82,38 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-//edit label TODO: Mark as "to save".
+//shows asterisk if file is modified
+void MainWindow::visualizeModified()
+{
+    QString wt=this->windowTitle();
+    if (this->img->getModified())
+    {
+        if (wt.at(wt.length()-1)!='*')
+        {
+            this->setWindowTitle(this->windowTitle()+" *");
+            ui->actionSave->setEnabled(1);
+        }
+    }
+    else
+    {
+        if (wt.at(wt.length()-1)=='*')
+        {
+            this->setWindowTitle(this->windowTitle().left(this->windowTitle().length()-1));
+            ui->actionSave->setEnabled(0);
+        }
+
+    }
+}
+
+//edit label
 void MainWindow::on_label_edit()
 {
-    this->label=this->leLabel->text();
+    this->leLabel->setText(this->leLabel->text().toUpper());
+    if (this->img->getLabel()!=this->leLabel->text())
+    {
+        this->img->setLabel(this->leLabel->text());
+        visualizeModified();
+    }
 }
 
 //this thing sorts the doirectories always upwards.
@@ -107,7 +137,7 @@ void MainWindow::customSortByColumn(int column)
 
 void MainWindow::on_actionExit_triggered()
 {
-    if (needsSave)
+    if ((this->img!=NULL)&&(this->img->getModified()))
     {
         //REMEMBER ABOUT SAVING QUESTION!
 
@@ -117,12 +147,12 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionOpen_triggered()
 {
-    if (needsSave)  //to another function
+    if ((this->img!=NULL)&&(this->img->getModified()))
     {
         //REMEMBER ABOUT SAVING QUESTION!
 
     }
-    QString fname = QFileDialog::getOpenFileName(this,"Open Image","","Disk Images (*.ima *.dsk *.img);;All files (*.*)");
+    QString fname = QFileDialog::getOpenFileName(this,"Open Image","","Disk Images (*.ima *.dsk *.img);;All files (*)");
     if (fname!="")
     {
         ui->statusBar->showMessage("Loading file ...");
@@ -132,181 +162,21 @@ void MainWindow::on_actionOpen_triggered()
     }
 }
 
-//execute mtools with specific command on currently loaded image.
-int MainWindow::execute(QString command, QString parameters, QString &result)       //TO BE PORTED
-{
-    QProcess executing;
-    executing.setProcessChannelMode(QProcess::MergedChannels);
-    executing.start("mtools -c "+command+" -i \""+this->currentFile+"\" "+parameters);
-    executing.waitForFinished();
-
-    QString op(executing.readAllStandardOutput());
-   // op=op+"\n\n\n\n"+executing.readAllStandardError();
-    result=op;
-    return executing.exitCode();
-}
-
 //load file
 int MainWindow::loadFile(QString fileName)
 {
     this->currentFile=fileName;
     this->currentDir="::/";
     //Mantle interface
-    this->prepareDirDump(currentDir);
+    this->img = new ImageFile(fileName);
+    this->dirs=this->img->getContents(currentDir);
     //Visualize directories
     this->visualize();
+    this->visualizeModified();
     ui->twDirTree->setCurrentItem(ui->twDirTree->topLevelItem(0));  //select first item. Do not remove this.
+    this->leLabel->setEnabled(1);
+    ui->actionSave_As->setEnabled(1);
     return 0;
-}
-
-//throw error message
-int MainWindow::errorMessage(QString text, QString console)
-{
-    ErrorDialog * a = new ErrorDialog(this,text,console);
-    a->show();
-    return 0;
-}
-
-//Prepares directory dump and reads them to internal structure
-int MainWindow::prepareDirDump(QString home)
-{
-    this->freeSpace=0;
-    this->usedSpace=0;
-    QString op;
-    int status=this->execute("mdir","-/ -a \""+home+"\"",op);
-    if (status!=0)
-    {
-        errorMessage("Failed to acquire listing, code: "+QString::number(status),op);
-        return 1;
-    }
-
-    QString qsattrs;
-    status=this->execute("mattrib","-/ -X \""+home+"\"",qsattrs);
-    if (status!=0)
-    {
-        errorMessage("Failed to acquire attributes, code: "+QString::number(status),qsattrs);
-        return 1;
-    }
-    QStringList attrs = qsattrs.split('\n');
-
-    //QMessageBox::critical(this,"result",op);
-    //Parse results
-    QStringList lines = op.split('\n');
-
-    //volume label and serial
-    QString tmp=lines[0];
-    this->label=tmp.mid(tmp.indexOf("is")+2);
-    tmp=lines[1];
-    this->serial=tmp.mid(tmp.indexOf("is")+2);
-    //QMessageBox::critical(this,"result",this->label+"\n"+this->serial);
-
-    int lineCount=2;
-    QString myHome;
-    this->dirs.clear();
-    while (lineCount<lines.count())
-    {
-        if ((lines[lineCount].length()==0)||(lines[lineCount].indexOf("files       ")>0)||
-                (lines[lineCount].indexOf(".            <DIR>")>=0)||
-                   (lines[lineCount].indexOf("..           <DIR>")>=0))
-        {
-            lineCount++;
-            continue;
-        }
-        if (lines[lineCount].indexOf("Total files listed:")>=0)
-        {
-
-            QString a=lines[lineCount+2];
-            a=a.replace("bytes free","").trimmed();
-            a=a.replace(" ","");
-            this->freeSpace=a.toInt();
-            break;
-        }
-        if (lines[lineCount].indexOf("bytes free")>=0)
-        {
-            QString a=lines[lineCount];
-            a=a.replace("bytes free","").trimmed();
-            a=a.replace(" ","");
-            this->freeSpace=a.toInt();
-            break;
-        }
-        if (lines[lineCount].indexOf("Directory for")>=0)
-        {
-            myHome=lines[lineCount].mid(lines[lineCount].indexOf("Directory for")+14);
-            if (myHome.at(myHome.length()-1)!='/')
-            {
-                myHome+='/';
-            }
-        }
-        else
-        {
-            fileEntry plik;
-            plik.attrib="-";
-            QString l=lines[lineCount];
-            plik.name=myHome+l.mid(0,8).trimmed();
-            if (l.mid(9,4).trimmed().length()>0)
-            {
-                plik.name+="."+l.mid(9,4).trimmed();
-            }
-            if (l.mid(13,5)=="<DIR>")
-            {
-                plik.size=0;
-                plik.attrib="D";
-            }
-            else
-            {
-                plik.size=l.mid(13,9).trimmed().toInt();
-            }
-            plik.date=l.mid(23,17);
-            if (l.length()>41)  //use lfn
-            {
-                plik.name=myHome+l.mid(42);
-            }
-            //This is a VERY BAD routine for attribute getting.
-            //It should be corrected as it's slow.
-            for (int i=0;i<attrs.count();i++)
-            {
-                if (attrs[i].endsWith(plik.name,Qt::CaseInsensitive))
-                {
-                    //Parse attribute string
-                    //append attributes like:
-                    //drahs or -----
-                    QString attrString=attrs[i].split(':')[0].trimmed();
-                    if (attrString.contains('A'))
-                        plik.attrib+="a";
-                    else
-                        plik.attrib+="-";
-                    if (attrString.contains('R'))
-                        plik.attrib+="r";
-                    else
-                        plik.attrib+="-";
-                    if (attrString.contains('H'))
-                        plik.attrib+="h";
-                    else
-                        plik.attrib+="-";
-                    if (attrString.contains('S'))
-                        plik.attrib+="s";
-                    else
-                        plik.attrib+="-";
-                   // plik.attrib.endsWith("aaa",Qt::CaseInsensitive)
-                }
-            }
-
-            this->dirs.append(plik);
-        }
-        lineCount++;
-    }
-
-    for (int i=0;i<this->dirs.count();i++)
-    {
-        this->usedSpace+=dirs[i].size;
-    }
-//    QString m="";
-//    for (int i=0;i<this->dirs.count();i++)
-//    {
-//        m=m+dirs[i].name+"  "+QString::number(dirs[i].size)+"  "+dirs[i].attrib+"  "+dirs[i].date+"\n";
-//    }
-//    QMessageBox::critical(this,"aaa",m);
-    return status;
 }
 
 //visualize trees
@@ -358,10 +228,26 @@ void MainWindow::visualize()
         }
     }
     ui->twDirTree->expandItem(treeItem);
-    this->leLabel->setText(this->label);
+    this->leLabel->setText(this->img->getLabel());
 
     this->statusBarNormal();
     //TODO: Restore selected things as were.
+}
+
+
+//makes number in decimal byte form
+QString decNumber(int source)
+{
+ QString a=QString::number(source);
+ QString b="";
+ for (int i=a.length()-1; i>=0; i--)
+ {
+     if (b.length()%4==0)
+         b=" "+b;
+     b=a.at(i)+b;
+
+ }
+ return b.trimmed();
 }
 
 //change directory
@@ -396,7 +282,7 @@ void MainWindow::on_twDirTree_currentItemChanged(QTreeWidgetItem *current)
         {
             QTreeWidgetItem * entry = new QTreeWidgetItem(ui->twFileTree);
             entry->setText(0,dirs[i].name.split('/').last());
-            entry->setText(1,QString::number(dirs[i].size));
+            entry->setText(1,decNumber(dirs[i].size));
             entry->setText(2,dirs[i].attrib);
             entry->setText(3,dirs[i].date);
             entry->setText(4,dirs[i].name);
@@ -483,7 +369,7 @@ void MainWindow::statusBarNormal()
         {
             si+=ui->twFileTree->selectedItems().at(i)->text(1).toInt();
         }
-        sb+="Selected "+QString::number(i)+" item/s, occupying "+QString::number(si)+"B";
+        sb+="Selected "+QString::number(i)+" item/s, occupying "+decNumber(si)+"B";
    }
    else
    {
@@ -493,9 +379,9 @@ void MainWindow::statusBarNormal()
         si+=(*it)->text(1).toInt();
         ++it;
        }
-       sb+=QString::number(ui->twFileTree->topLevelItemCount())+" item/s, occupying "+QString::number(si)+"B";
+       sb+=QString::number(ui->twFileTree->topLevelItemCount())+" item/s, occupying "+decNumber(si)+"B";
    }
-   sb+=" ("+QString::number(this->freeSpace)+"B free)";
+   sb+=" ("+decNumber(this->img->getFreeSpace())+"B free)";
 
    ui->statusBar->showMessage(sb);
 }
@@ -505,4 +391,24 @@ void MainWindow::statusBarNormal()
 void MainWindow::on_twFileTree_itemSelectionChanged()
 {
     this->statusBarNormal();
+}
+
+void MainWindow::on_actionSave_As_triggered()
+{
+    QString fname = QFileDialog::getSaveFileName(this,"Save Image as","","Disk Images (*.ima *.dsk *.img);;All files (*)");
+    if ((!fname.endsWith("img",Qt::CaseInsensitive))&&(!fname.endsWith("ima",Qt::CaseInsensitive))
+            &&(!fname.endsWith("dsk",Qt::CaseInsensitive))&&(!fname.endsWith("raw",Qt::CaseInsensitive)))
+        fname=fname+".img";
+
+    if (fname!="")
+    {
+        this->img->saveFile(fname);
+    }
+    visualizeModified();
+}
+
+void MainWindow::on_actionSave_triggered()
+{
+    this->img->saveFile("");
+    visualizeModified();
 }

@@ -17,6 +17,7 @@ ErrorDialog::ErrorDialog(QWidget *parent, QString text, QString cons) :
             //QApplication::style()->standardIcon(QStyle::SP_DriveFDIcon)
     ui->lbErrorTitle->setText(text);
     ui->peConsole->setPlainText(cons);
+    ui->peConsole->setReadOnly(1);
 }
 
 ErrorDialog::~ErrorDialog()
