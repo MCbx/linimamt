@@ -74,8 +74,12 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
         //volume label and serial
         QString tmp=lines[0];
         this->label=tmp.mid(tmp.indexOf("is")+3);
+        if (this->label.contains("has no label",Qt::CaseInsensitive))
+        {
+            this->label="";
+        }
         tmp=lines[1];
-        this->serial=tmp.mid(tmp.indexOf("is")+2);
+        this->serial=tmp.mid(tmp.indexOf("is")+3);
         //QMessageBox::critical(this,"result",this->label+"\n"+this->serial);
 
         int lineCount=2;
@@ -205,6 +209,39 @@ int ImageFile::moveFile(QString source, QString destination)
     return 0;
 }
 
+int ImageFile::makeFolder(QString path)
+{
+    this->prepareForModify();
+    QString op;
+    if ((path.contains("\\..\\"))||(path.contains("/../")))
+    {
+        errorMessage("Internal error","Relative path passed");
+        return 2;
+    }
+    int status=this->execute("mmd"," \""+path+"\"",op);
+    if (status!=0)
+    {
+        errorMessage("Failed to add folder. Code "+QString::number(status),op);
+        return 1;
+    }
+    this->modified=1;
+    return 0;
+}
+
+void ImageFile::setSerial(QString serial)
+{
+    this->prepareForModify();
+    QString op;
+    int status=this->execute("mlabel","::\""+this->label+"\" -N "+serial,op);
+    if (status!=0)
+    {
+        errorMessage("Failed to modify serial number. Code "+QString::number(status),op);
+        return;
+    }
+    this->modified=1;
+    this->serial=serial;
+    return;
+}
 
 //execute mtools with specific command on currently loaded image.
 int ImageFile::execute(QString command, QString parameters, QString &result)       //TO BE PORTED

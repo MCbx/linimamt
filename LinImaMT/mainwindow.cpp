@@ -21,12 +21,9 @@
 // Delete files/dirs
 // New image
 // Drag-drop
-// serial editing
 // Boot sector preferences
-//New folder
 // Save preferences, window sizes etc.
 // Command-line parameters
-//Rename in image
 //Move in image
 //Copy in image
 
@@ -177,6 +174,8 @@ int MainWindow::loadFile(QString fileName)
     ui->twDirTree->setCurrentItem(ui->twDirTree->topLevelItem(0));  //select first item. Do not remove this.
     this->leLabel->setEnabled(1);
     ui->actionSave_As->setEnabled(1);
+    ui->actionCreate_Directory->setEnabled(1);
+    ui->actionVolume_Serial->setEnabled(1);
     return 0;
 }
 
@@ -184,6 +183,12 @@ int MainWindow::loadFile(QString fileName)
 void MainWindow::visualize()
 {
     //TODO: Save position.
+    QString currentDir="";
+    QTreeWidgetItem * prev=NULL;
+    if (ui->twDirTree->selectedItems().count()>0)
+    {
+        currentDir=this->leAddress->text();
+    }
 
     ui->twDirTree->clear();
     ui->twFileTree->clear();
@@ -215,12 +220,18 @@ void MainWindow::visualize()
     {
         former=treeItem;
         QStringList folders=names[i].split('/');
+        QString pth="::/";
         for (int j=1;j<folders.count();j++)
         {
+            pth=pth+folders.at(j)+"/";
             QTreeWidgetItem * sub = new QTreeWidgetItem();
             sub->setText(0,folders.at(j));
-          //  sub->setText(1,names[i]);
+            if (currentDir==pth)
+            {
+                prev=sub;
+            }
             sub->setIcon(0,QApplication::style()->standardIcon(QStyle::SP_DirClosedIcon));
+
             if (ui->twDirTree->findItems(names[i],Qt::MatchContains,1).count()==0)
             {
                 former->addChild(sub);
@@ -231,8 +242,14 @@ void MainWindow::visualize()
     ui->twDirTree->expandItem(treeItem);
     this->leLabel->setText(this->img->getLabel());
 
-    this->statusBarNormal();
     //TODO: Restore selected things as were.
+    if (prev!=NULL)
+    {
+        ui->twDirTree->setCurrentItem(prev);
+    }
+
+    this->statusBarNormal();
+    this->visualizeModified();
 }
 
 
@@ -431,12 +448,21 @@ void MainWindow::on_actionRename_triggered()
     QInputDialog *renameDialog = new QInputDialog();
 
     //show user some fancy thing
-    QString destination = renameDialog->getText(0, "Rename", "New name:", QLineEdit::Normal,
+    QString destination = renameDialog->getText(this, "Rename", "New name:", QLineEdit::Normal,
                                            fileName, &dialogResult);
     if ((destination.length()==0)||(!dialogResult)||(destination==fileName))
     {
+        this->statusBarNormal();
         return;
     }
+    QList<QTreeWidgetItem *> existent= ui->twFileTree->findItems(destination,Qt::MatchFixedString);
+    if (existent.count()!=0)
+    {
+        QMessageBox::critical(this,"Error","Failed to proceed - such item exists.");
+        this->statusBarNormal();
+        return;
+    }
+
     destination=this->leAddress->text()+destination;
     //rename
     this->img->moveFile(source,destination);
@@ -445,6 +471,72 @@ void MainWindow::on_actionRename_triggered()
     this->dirs=this->img->getContents(currentDir);
     //Visualize directories
     this->visualize();
-    visualizeModified();
+    return;
+}
+
+void MainWindow::on_actionCreate_Directory_triggered()
+{
+        bool dialogResult;
+        QInputDialog *mkdirDialog = new QInputDialog();
+
+        //show user some fancy thing
+        QString destination = mkdirDialog->getText(this, "Create directory", "Folder name:", QLineEdit::Normal,
+                                               "", &dialogResult);
+        if ((destination.length()==0)||(!dialogResult))
+        {
+            this->statusBarNormal();
+            return;
+        }
+        QList<QTreeWidgetItem *> existent= ui->twFileTree->findItems(destination,Qt::MatchFixedString);
+        if (existent.count()!=0)
+        {
+            QMessageBox::critical(this,"Error","Failed to proceed - such item exists.");
+            this->statusBarNormal();
+            return;
+        }
+
+        destination=this->leAddress->text()+destination;
+        this->img->makeFolder(destination);
+
+        //refresh
+        this->dirs=this->img->getContents(currentDir);
+        //Visualize directories
+        this->visualize();
+        return;
+}
+
+void MainWindow::on_actionVolume_Serial_triggered()
+{
+    bool dialogResult;
+    QInputDialog *serialDialog = new QInputDialog();
+
+    //show user some fancy thing
+    QString g=img->getSerial();
+    if (!g.contains("-"))
+    {
+        g=g.left(4)+"-"+g.right(4);
+    }
+    QString destination = serialDialog->getText(this, "Volume serial", "Volume serial:", QLineEdit::Normal,
+                                           g, &dialogResult);
+    if ((destination.length()==0)||(!dialogResult)||(destination==img->getSerial()))
+    {
+        this->statusBarNormal();
+        return;
+    }
+    destination=destination.toUpper();
+    destination=destination.trimmed().replace("-","");
+    bool isHex = false;
+    destination.toInt(&isHex, 16);
+    if ((destination.length()!=8)||(!isHex))
+    {
+        QMessageBox::critical(this,"Error","Failed to proceed - serial should be 8-digit hex number.");
+        this->statusBarNormal();
+        return;
+    }
+
+    //set
+    this->img->setSerial(destination);
+    this->visualizeModified();
+    ui->statusBar->showMessage("Serial number has been changed");
     return;
 }

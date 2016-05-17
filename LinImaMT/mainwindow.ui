@@ -144,6 +144,8 @@
      <string>Image</string>
     </property>
     <addaction name="actionRename"/>
+    <addaction name="actionCreate_Directory"/>
+    <addaction name="actionVolume_Serial"/>
    </widget>
    <widget class="QMenu" name="menuDisk">
     <property name="title">
@@ -261,6 +263,22 @@
    </property>
    <property name="shortcut">
     <string>F2</string>
+   </property>
+  </action>
+  <action name="actionCreate_Directory">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Create Directory</string>
+   </property>
+  </action>
+  <action name="actionVolume_Serial">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Volume Serial...</string>
    </property>
   </action>
  </widget>

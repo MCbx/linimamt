@@ -21,7 +21,7 @@ public:
    // int copyFiles(QList<QString> sources, QString destination);
       int moveFile(QString source, QString destination);
    // int deleteFiles(QList<QString> sources);
-   // int makeFolder(QString path);
+    int makeFolder(QString path);
     QList<fileEntry> getContents(QString home);              //return contents for visualization
 
     int getFreeSpace();
@@ -29,7 +29,7 @@ public:
     QString getLabel();
     QString getSerial();
     QString setLabel(QString label);
-    //QString setSerial(QString serial);
+    void setSerial(QString serial);
     bool getModified();
 
     int saveFile(QString fileName);

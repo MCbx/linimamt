@@ -42,6 +42,10 @@ private slots:
 
     void on_actionRename_triggered();
 
+    void on_actionCreate_Directory_triggered();
+
+    void on_actionVolume_Serial_triggered();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;
