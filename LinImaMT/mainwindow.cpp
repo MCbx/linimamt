@@ -439,6 +439,7 @@ void MainWindow::on_actionSave_triggered()
     visualizeModified();
 }
 
+//rename
 void MainWindow::on_actionRename_triggered()
 {
     //get path of source
