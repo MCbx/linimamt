@@ -209,6 +209,25 @@ int ImageFile::moveFile(QString source, QString destination)
     return 0;
 }
 
+int ImageFile::copyFile(QString source, QString destination)
+{
+    this->prepareForModify();
+    QString op;
+    if ((destination.contains("\\..\\"))||(destination.contains("/../")))
+    {
+        errorMessage("Internal error","Relative path passed");
+        return 2;
+    }
+    int status=this->execute("mcopy","-s -p -n -m -v -Q \""+source+"\" \""+destination+"\"",op);
+    if (status!=0)
+    {
+        errorMessage("Failed to copy. Code "+QString::number(status),op);
+        return 1;
+    }
+    this->modified=1;
+    return 0;
+}
+
 int ImageFile::makeFolder(QString path)
 {
     this->prepareForModify();

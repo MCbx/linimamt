@@ -46,6 +46,8 @@ private slots:
 
     void on_actionVolume_Serial_triggered();
 
+    void on_actionExtract_selected_triggered();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;

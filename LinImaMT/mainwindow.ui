@@ -146,6 +146,7 @@
     <addaction name="actionRename"/>
     <addaction name="actionCreate_Directory"/>
     <addaction name="actionVolume_Serial"/>
+    <addaction name="actionExtract_selected"/>
    </widget>
    <widget class="QMenu" name="menuDisk">
     <property name="title">
@@ -279,6 +280,14 @@
    </property>
    <property name="text">
     <string>Volume Serial...</string>
+   </property>
+  </action>
+  <action name="actionExtract_selected">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Extract selected...</string>
    </property>
   </action>
  </widget>

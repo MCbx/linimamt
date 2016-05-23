@@ -16,7 +16,6 @@
 
 //////// MEMENTO ////////
 //      TODO LIST      //
-// Extract files/dirs
 // Add files/dirs
 // Delete files/dirs
 // New image
@@ -383,6 +382,7 @@ void MainWindow::statusBarNormal()
    if (ui->twFileTree->selectedItems().count()>0)
    {
         int i;
+        ui->actionExtract_selected->setEnabled(1);
         for (i=0;i<ui->twFileTree->selectedItems().count();i++)
         {
             si+=ui->twFileTree->selectedItems().at(i)->text(1).toInt();
@@ -404,10 +404,12 @@ void MainWindow::statusBarNormal()
    if (ui->twFileTree->selectedItems().count()==1)
    {
        ui->actionRename->setEnabled(1);
+       ui->actionExtract_selected->setEnabled(1);
    }
-   else
+   if (ui->twFileTree->selectedItems().count()==0)
    {
        ui->actionRename->setEnabled(0);
+       ui->actionExtract_selected->setEnabled(0);
    }
    ui->statusBar->showMessage(sb);
 }
@@ -539,5 +541,33 @@ void MainWindow::on_actionVolume_Serial_triggered()
     this->img->setSerial(destination);
     this->visualizeModified();
     ui->statusBar->showMessage("Serial number has been changed");
+    return;
+}
+
+void MainWindow::on_actionExtract_selected_triggered()
+{
+    //propose user destination directory
+    QString dir = QFileDialog::getExistingDirectory(this, "Destination Directory", "", QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks);
+    if (dir =="")
+    {
+        return;
+    }
+
+    //get paths of selected things and extract them
+    for (int i=0;i<ui->twFileTree->selectedItems().count();i++)
+    {
+         QString fileName=ui->twFileTree->selectedItems().at(i)->text(0);
+         fileName=this->leAddress->text()+fileName;
+         ui->statusBar->showMessage("Extracting "+ui->twFileTree->selectedItems().at(i)->text(0)+" ("+QString::number(i)+"/"+QString::number(ui->twFileTree->selectedItems().count())+")");
+         QApplication::processEvents();
+         this->img->copyFile(fileName,dir);
+    }
+
+
+    //refresh
+    this->dirs=this->img->getContents(currentDir);
+    //Visualize directories
+    this->visualize();
+    this->statusBarNormal();
     return;
 }
