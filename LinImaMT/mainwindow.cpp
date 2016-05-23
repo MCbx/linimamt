@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     //VERIFY EXISTENCE OF MTOOLS!
-    this->process=new QProcess(this);   //TO BE PORTED
+    this->process=new QProcess(this);   //TO BE PORTED win
   //  this->process=new QProcess(this);
     this->process->start("which mtools");
     this->process->waitForFinished();
