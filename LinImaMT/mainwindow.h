@@ -48,6 +48,8 @@ private slots:
 
     void on_actionExtract_selected_triggered();
 
+    void on_actionDelete_selected_triggered();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;

@@ -383,6 +383,7 @@ void MainWindow::statusBarNormal()
    {
         int i;
         ui->actionExtract_selected->setEnabled(1);
+        ui->actionDelete_selected->setEnabled(1);
         for (i=0;i<ui->twFileTree->selectedItems().count();i++)
         {
             si+=ui->twFileTree->selectedItems().at(i)->text(1).toInt();
@@ -410,6 +411,7 @@ void MainWindow::statusBarNormal()
    {
        ui->actionRename->setEnabled(0);
        ui->actionExtract_selected->setEnabled(0);
+       ui->actionDelete_selected->setEnabled(0);
    }
    ui->statusBar->showMessage(sb);
 }
@@ -570,4 +572,30 @@ void MainWindow::on_actionExtract_selected_triggered()
     this->visualize();
     this->statusBarNormal();
     return;
+}
+
+void MainWindow::on_actionDelete_selected_triggered()
+{
+    QMessageBox::StandardButton reply;
+     reply = QMessageBox::question(this, "Delete", "Do you want to delete selected files?",
+                                   QMessageBox::Yes|QMessageBox::No);
+     if (reply == QMessageBox::Yes)
+     {
+         for (int i=0;i<ui->twFileTree->selectedItems().count();i++)
+         {
+              QString fileName=ui->twFileTree->selectedItems().at(i)->text(0);
+              fileName=this->leAddress->text()+fileName;
+              ui->statusBar->showMessage("Deleting "+ui->twFileTree->selectedItems().at(i)->text(0)+" ("+QString::number(i)+"/"+QString::number(ui->twFileTree->selectedItems().count())+")");
+              QApplication::processEvents();
+              this->img->deleteFile(fileName);
+         }
+     }
+
+    //refresh
+    this->dirs=this->img->getContents(currentDir);
+    //Visualize directories
+    this->visualize();
+    this->statusBarNormal();
+    return;
+
 }

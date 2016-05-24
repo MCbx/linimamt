@@ -247,6 +247,25 @@ int ImageFile::makeFolder(QString path)
     return 0;
 }
 
+int ImageFile::deleteFile(QString source)
+{
+    this->prepareForModify();
+    QString op="";
+    if ((source.contains("\\..\\"))||(source.contains("/../")))
+    {
+        errorMessage("Internal error","Relative path passed");
+        return 2;
+    }
+    int status=this->execute("mdeltree","-v \""+source+"\"",op);
+    if (status!=0)
+    {
+        errorMessage("Failed to delete. Code "+QString::number(status),op);
+        return 1;
+    }
+    this->modified=1;
+    return 0;
+}
+
 void ImageFile::setSerial(QString serial)
 {
     this->prepareForModify();
