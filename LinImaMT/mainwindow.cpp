@@ -1,3 +1,5 @@
+//Open source, GPL, by MCbx 2016
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QFile>
@@ -15,7 +17,7 @@
 
 //////// MEMENTO ////////
 //      TODO LIST      //
-// New image
+// New image in different formats
 // Drag-drop
 // Boot sector preferences
 // Save preferences, window sizes etc.
@@ -201,7 +203,6 @@ void MainWindow::visualize()
     treeItem->setText(1,"::/");
     treeItem->setIcon(0,QApplication::style()->standardIcon(QStyle::SP_DriveFDIcon));
     //traverse thru the list and find dirs. These dirs will be added
-    QTreeWidgetItem * former = treeItem;
     foldery.append(treeItem);
     added.append("::/");
 
@@ -228,7 +229,6 @@ void MainWindow::visualize()
     {
         if (names[i]=="")
             continue;
-        former=treeItem;
         QStringList folders=names[i].split('/');
         QString pth="::/";
         for (int j=1;j<folders.count();j++)
@@ -435,6 +435,8 @@ void MainWindow::on_twFileTree_itemSelectionChanged()
     this->statusBarNormal();
 }
 
+//Save file "as" is always accessible. Then the working file
+//is changed to saved file.
 void MainWindow::on_actionSave_As_triggered()
 {
     QString fname = QFileDialog::getSaveFileName(this,"Save Image as","","Disk Images (*.ima *.dsk *.img);;All files (*)");
@@ -449,6 +451,7 @@ void MainWindow::on_actionSave_As_triggered()
     visualizeModified();
 }
 
+//Just save. Img will copy all things needed.
 void MainWindow::on_actionSave_triggered()
 {
     this->img->saveFile("");
@@ -491,6 +494,7 @@ void MainWindow::on_actionRename_triggered()
     return;
 }
 
+//Create directory in current dir
 void MainWindow::on_actionCreate_Directory_triggered()
 {
         bool dialogResult;
@@ -522,6 +526,7 @@ void MainWindow::on_actionCreate_Directory_triggered()
         return;
 }
 
+//Modify serial number
 void MainWindow::on_actionVolume_Serial_triggered()
 {
     bool dialogResult;
@@ -558,6 +563,7 @@ void MainWindow::on_actionVolume_Serial_triggered()
     return;
 }
 
+//Copy selected files into filesystem
 void MainWindow::on_actionExtract_selected_triggered()
 {
     //propose user destination directory
@@ -586,6 +592,7 @@ void MainWindow::on_actionExtract_selected_triggered()
     return;
 }
 
+//Delete selected items.
 void MainWindow::on_actionDelete_selected_triggered()
 {
     QMessageBox::StandardButton reply;
@@ -612,8 +619,8 @@ void MainWindow::on_actionDelete_selected_triggered()
 
 }
 
-
-
+//Copy files from filesystem into image. This must be split between dir/file
+//as Qt doesn't support selecting Files/dirs in one window (June 2016).
 void MainWindow::on_actionAdd_triggered()
 {
     //Open file picker
@@ -658,6 +665,7 @@ void MainWindow::on_actionAdd_triggered()
     return;
 }
 
+//helper to estimate size of directory
 quint64 dir_size(const QString & str)
 {
     quint64 sizex = 0;
@@ -681,7 +689,8 @@ quint64 dir_size(const QString & str)
     return sizex;
 }
 
-
+//Add directory. This must be split between dir/file
+//as Qt doesn't support selecting Files/dirs in one window (June 2016).
 void MainWindow::on_actionAdd_Directories_triggered()
 {
     //Open file picker
@@ -713,8 +722,6 @@ void MainWindow::on_actionAdd_Directories_triggered()
             ui->statusBar->showMessage("Adding "+fileName);
             QApplication::processEvents();
             this->img->copyFile(fileName,this->leAddress->text());
-
-
 
     //refresh
     this->dirs=this->img->getContents(currentDir);
