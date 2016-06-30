@@ -50,6 +50,10 @@ private slots:
 
     void on_actionDelete_selected_triggered();
 
+    void on_actionAdd_triggered();
+
+    void on_actionAdd_Directories_triggered();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;

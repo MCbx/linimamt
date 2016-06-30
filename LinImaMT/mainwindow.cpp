@@ -11,13 +11,10 @@
 #include <QFontDatabase>
 #include <QInputDialog>
 #include "errordialog.h"
-
-
+#include <QFileInfo>
 
 //////// MEMENTO ////////
 //      TODO LIST      //
-// Add files/dirs
-// Delete files/dirs
 // New image
 // Drag-drop
 // Boot sector preferences
@@ -25,6 +22,8 @@
 // Command-line parameters
 //Move in image
 //Copy in image
+//attributes
+//Mess with metadata!
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -175,6 +174,8 @@ int MainWindow::loadFile(QString fileName)
     ui->actionSave_As->setEnabled(1);
     ui->actionCreate_Directory->setEnabled(1);
     ui->actionVolume_Serial->setEnabled(1);
+    ui->actionAdd->setEnabled(1);
+    ui->actionAdd_Directories->setEnabled(1);   //TODO: Create "ArmUI" and "DisarmUI" functions with this stuff
     return 0;
 }
 
@@ -192,12 +193,18 @@ void MainWindow::visualize()
     ui->twDirTree->clear();
     ui->twFileTree->clear();
 
+    QList<QTreeWidgetItem*> foldery;
+    QStringList added;
+
     QTreeWidgetItem *treeItem = new QTreeWidgetItem(ui->twDirTree);
     treeItem->setText(0,"::/");
     treeItem->setText(1,"::/");
     treeItem->setIcon(0,QApplication::style()->standardIcon(QStyle::SP_DriveFDIcon));
     //traverse thru the list and find dirs. These dirs will be added
     QTreeWidgetItem * former = treeItem;
+    foldery.append(treeItem);
+    added.append("::/");
+
     QStringList names;
     for (int i=0;i<this->dirs.count();i++)
     {
@@ -214,28 +221,33 @@ void MainWindow::visualize()
         if (names.at(i).contains(names.at(i-1)))
             names[i-1]="";
     }
+    qSort(names.begin(),names.end());
 
-    for (int i=0;i<names.count();i++)
+
+    for (int i=0;i<names.count();i++)   //create tree from folders
     {
+        if (names[i]=="")
+            continue;
         former=treeItem;
         QStringList folders=names[i].split('/');
         QString pth="::/";
         for (int j=1;j<folders.count();j++)
         {
-            pth=pth+folders.at(j)+"/";
+            QString pth1=pth+folders.at(j)+"/";
             QTreeWidgetItem * sub = new QTreeWidgetItem();
             sub->setText(0,folders.at(j));
-            if (currentDir==pth)
-            {
-                prev=sub;
-            }
             sub->setIcon(0,QApplication::style()->standardIcon(QStyle::SP_DirClosedIcon));
-
-            if (ui->twDirTree->findItems(names[i],Qt::MatchContains,1).count()==0)
+            if (added.indexOf(pth1)>-1) //if we have such animal, skip it,
             {
-                former->addChild(sub);
-                former=sub;
+                pth=pth1;               //remember only position
+                continue;
             }
+            added.append(pth1);         //WE WILL ADD. Accoun it in model - name
+            foldery.append(sub);        //Account in model - item
+            //determine where to connect sub
+            int q=added.indexOf(pth);
+            foldery.at(q)->addChild(sub);
+            pth=pth1;
         }
     }
     ui->twDirTree->expandItem(treeItem);
@@ -598,4 +610,116 @@ void MainWindow::on_actionDelete_selected_triggered()
     this->statusBarNormal();
     return;
 
+}
+
+
+
+void MainWindow::on_actionAdd_triggered()
+{
+    //Open file picker
+    QFileDialog fileDlg(this,"Add files","","All files (*)");
+    fileDlg.setFileMode(QFileDialog::ExistingFiles);
+    if (!fileDlg.exec())
+        return;
+    uint fsize=0;
+    ui->statusBar->showMessage("Estimating size...");
+    QApplication::processEvents();
+    for (int i=0;i<fileDlg.selectedFiles().count();i++)
+    {
+        QFileInfo fi(fileDlg.selectedFiles().at(i));
+        fsize+=fi.size();
+    }
+    if (fsize>(uint)this->img->getFreeSpace())
+    {
+        //Marian, to jebnie!
+         QMessageBox::StandardButton reply;
+         reply = QMessageBox::question(this, "Add", "Files to add are: "+QString::number(fsize)+" Bytes\nBut free space is: "+QString::number(this->img->getFreeSpace())+" Bytes\n Do you want to continue?",
+                                       QMessageBox::Yes|QMessageBox::No);
+         if (reply == QMessageBox::No)
+         {
+             return;
+             this->statusBarNormal();
+         }
+    }
+
+    for (int i=0;i<fileDlg.selectedFiles().count();i++)
+    {
+            QString fileName=fileDlg.selectedFiles().at(i);
+            ui->statusBar->showMessage("Adding "+fileName+" ("+QString::number(i)+"/"+QString::number(fileDlg.selectedFiles().count())+")");
+            QApplication::processEvents();
+            this->img->copyFile(fileName,this->leAddress->text());
+    }
+
+    //refresh
+    this->dirs=this->img->getContents(currentDir);
+    //Visualize directories
+    this->visualize();
+    this->statusBarNormal();
+    return;
+}
+
+quint64 dir_size(const QString & str)
+{
+    quint64 sizex = 0;
+    QFileInfo str_info(str);
+    if (str_info.isDir())
+    {
+        QDir dir(str);
+        QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs |  QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+        for (int i = 0; i < list.size(); ++i)
+        {
+            QFileInfo fileInfo = list.at(i);
+            if(fileInfo.isDir())
+            {
+                    sizex += dir_size(fileInfo.absoluteFilePath());
+            }
+            else
+                sizex += fileInfo.size();
+
+        }
+    }
+    return sizex;
+}
+
+
+void MainWindow::on_actionAdd_Directories_triggered()
+{
+    //Open file picker
+    QFileDialog fileDlg(this,"Add Directory","","All files (*)");
+    fileDlg.setFileMode(QFileDialog::Directory);
+    fileDlg.setOption(QFileDialog::ShowDirsOnly,false);
+    if (!fileDlg.exec())
+        return;
+    uint fsize=0;
+    ui->statusBar->showMessage("Estimating size...");
+    QApplication::processEvents();
+
+    fsize=dir_size(fileDlg.selectedFiles().at(0));
+
+    if (fsize>(uint)this->img->getFreeSpace())
+    {
+        //Marian, to jebnie!
+         QMessageBox::StandardButton reply;
+         reply = QMessageBox::question(this, "Add", "Files to add are: "+QString::number(fsize)+" Bytes\nBut free space is: "+QString::number(this->img->getFreeSpace())+" Bytes\n Do you want to continue?",
+                                       QMessageBox::Yes|QMessageBox::No);
+         if (reply == QMessageBox::No)
+         {
+             return;
+             this->statusBarNormal();
+         }
+    }
+
+            QString fileName=fileDlg.selectedFiles().at(0);
+            ui->statusBar->showMessage("Adding "+fileName);
+            QApplication::processEvents();
+            this->img->copyFile(fileName,this->leAddress->text());
+
+
+
+    //refresh
+    this->dirs=this->img->getContents(currentDir);
+    //Visualize directories
+    this->visualize();
+    this->statusBarNormal();
+    return;
 }

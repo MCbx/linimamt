@@ -148,6 +148,8 @@
     <addaction name="actionVolume_Serial"/>
     <addaction name="actionExtract_selected"/>
     <addaction name="actionDelete_selected"/>
+    <addaction name="actionAdd"/>
+    <addaction name="actionAdd_Directories"/>
    </widget>
    <widget class="QMenu" name="menuDisk">
     <property name="title">
@@ -318,6 +320,22 @@
    </property>
    <property name="shortcut">
     <string>Del</string>
+   </property>
+  </action>
+  <action name="actionAdd">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Add Files...</string>
+   </property>
+  </action>
+  <action name="actionAdd_Directories">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Add Directory...</string>
    </property>
   </action>
  </widget>
