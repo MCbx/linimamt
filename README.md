@@ -18,6 +18,18 @@ License
 =====================
 GPL. Needs GPL Mtools.
 
+Working
+===========
+Which means: Now working, and probably has to be fixed on some edge cases:
+* Opening and saving modified image file,
+* Changing disk label and serial number
+* Browsing image file structure
+* Extracting files/directories
+* Adding files/directories
+* Renaming
+* Deleting
+
+
 Todo
 =========
 Most important things to do (except these in "MEMENTO" and "TODO" sections in source code):
