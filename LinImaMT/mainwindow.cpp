@@ -14,6 +14,7 @@
 #include <QInputDialog>
 #include "errordialog.h"
 #include <QFileInfo>
+#include <QSettings>
 
 //////// MEMENTO ////////
 //      TODO LIST      //
@@ -43,8 +44,6 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->menuBar->setEnabled(0);
         ui->mainToolBar->setEnabled(0);
     }
-    //READ SETTINGS!
-    //ini
 
     //PARSE PARAMETERS!!
 
@@ -70,6 +69,10 @@ MainWindow::MainWindow(QWidget *parent) :
     leLabel->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     leLabel->setEnabled(0);
     connect(leLabel,SIGNAL(editingFinished()),this,SLOT(on_label_edit()));
+
+
+    //READ SETTINGS!
+    this->loadSettings();
 
     this->img=NULL;
     //START application
@@ -134,14 +137,89 @@ void MainWindow::customSortByColumn(int column)
 
 }
 
+//on window close
 void MainWindow::on_actionExit_triggered()
+{
+    this->close();
+}
+
+void MainWindow::closeEvent(QCloseEvent *clsEv)
 {
     if ((this->img!=NULL)&&(this->img->getModified()))
     {
         //REMEMBER ABOUT SAVING QUESTION!
 
     }
+    this->saveSettings();
     this->close();
+}
+
+//Load initial settings
+void MainWindow::loadSettings()
+{
+    QString settingsPath = "imarc.ini";
+    #ifndef Q_OS_WIN32
+        settingsPath = QDir::homePath()+"/.imarc.ini";
+    #endif
+
+    QSettings settings(settingsPath,QSettings::IniFormat);
+    settings.beginGroup("GUI");
+    int winX=MainWindow::width();
+    int winY=MainWindow::height();
+    winX=settings.value("Width",QString::number(winX)).toInt();
+    winY=settings.value("Height",QString::number(winY)).toInt();
+    MainWindow::resize(winX,winY);
+    winX=20;
+    winX=settings.value("Split",winX).toInt();
+    winY=20;
+    winY=settings.value("Split2",winY).toInt();
+    QList<int> a;
+    a.append(winX);
+    a.append(winY);
+    ui->splitter->setSizes(a);
+
+    winX=ui->twFileTree->columnWidth(0);
+    winX=settings.value("Col0",QString::number(winX)).toInt();
+    ui->twFileTree->setColumnWidth(0,winX);
+    winX=ui->twFileTree->columnWidth(1);
+    winX=settings.value("Col1",QString::number(winX)).toInt();
+    ui->twFileTree->setColumnWidth(1,winX);
+    winX=ui->twFileTree->columnWidth(2);
+    winX=settings.value("Col2",QString::number(winX)).toInt();
+    ui->twFileTree->setColumnWidth(2,winX);
+    winX=ui->twFileTree->columnWidth(3);
+    winX=settings.value("Col3",QString::number(winX)).toInt();
+    ui->twFileTree->setColumnWidth(3,winX);
+
+    ui->tbAddressBar->setVisible(settings.value("AddressBar",true).toBool());
+    ui->actionAddress_bar->setChecked(settings.value("AddressBar",true).toBool());
+    settings.endGroup();
+
+}
+
+//Save settings
+void MainWindow::saveSettings()
+{
+    QString settingsPath = "imarc.ini";
+    #ifndef Q_OS_WIN32
+    settingsPath = QDir::homePath()+"/.imarc.ini";
+    #endif
+
+    QSettings settings(settingsPath,QSettings::IniFormat);
+    settings.beginGroup("GUI");
+    settings.setValue("Width",MainWindow::width());
+    settings.setValue("Height",MainWindow::height());
+    QList<int> a=ui->splitter->sizes();
+    settings.setValue("Split",MainWindow::width()-ui->splitter->sizes().at(1));
+    settings.setValue("Split2",MainWindow::width()-ui->splitter->sizes().at(0));
+    settings.setValue("Col0",ui->twFileTree->columnWidth(0));
+    settings.setValue("Col1",ui->twFileTree->columnWidth(1));
+    settings.setValue("Col2",ui->twFileTree->columnWidth(2));
+    settings.setValue("Col3",ui->twFileTree->columnWidth(3));
+    settings.setValue("AddressBar",ui->tbAddressBar->isVisible());
+    settings.endGroup();
+
+
 }
 
 void MainWindow::on_actionOpen_triggered()

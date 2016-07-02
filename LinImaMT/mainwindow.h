@@ -65,6 +65,7 @@ private:
     QList<ImageFile::fileEntry>dirs;
 
     //functions
+    void closeEvent(QCloseEvent *clsEv);
     int execute(QString command, QString parameters, QString & result);
     int loadFile(QString fileName);
     int prepareDirDump(QString home);
@@ -72,6 +73,8 @@ private:
     void visualize();
     void statusBarNormal();
     void visualizeModified();
+    void saveSettings();
+    void loadSettings();
 
     //ui components
     QLineEdit * leAddress;
