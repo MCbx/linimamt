@@ -44,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->mainToolBar->setEnabled(0);
     }
     //READ SETTINGS!
+    //ini
 
     //PARSE PARAMETERS!!
 
