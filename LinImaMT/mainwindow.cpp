@@ -21,7 +21,6 @@
 // New image in different formats
 // Drag-drop
 // Boot sector preferences
-// Save preferences, window sizes etc.
 // Command-line parameters
 //Move in image
 //Copy in image
@@ -75,6 +74,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->loadSettings();
 
     this->img=NULL;
+    ui->twFileTree->setDragDropMode(QTreeWidget::NoDragDrop);
     //START application
 }
 
@@ -251,6 +251,7 @@ int MainWindow::loadFile(QString fileName)
     this->visualize();
     this->visualizeModified();
     ui->twDirTree->setCurrentItem(ui->twDirTree->topLevelItem(0));  //select first item. Do not remove this.
+        ui->twFileTree->setDragDropMode(QTreeWidget::DragDrop);
     this->leLabel->setEnabled(1);
     ui->actionSave_As->setEnabled(1);
     ui->actionCreate_Directory->setEnabled(1);

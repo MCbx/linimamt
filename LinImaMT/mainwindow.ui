@@ -63,7 +63,7 @@
         </property>
        </column>
       </widget>
-      <widget class="QTreeWidget" name="twFileTree">
+      <widget class="IFileListWidget" name="twFileTree">
        <property name="selectionMode">
         <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
@@ -340,6 +340,13 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>IFileListWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>ifilelistwidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
