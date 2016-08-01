@@ -39,12 +39,11 @@ Most important things to do (except these in "MEMENTO" and "TODO" sections in so
  * Refactoring code. This window class with everything thrown into it doesn't look good.
  * Attribute editing, maybe messing with metadata
  * Do something with directory structure visualization code as it's quite bad now.
- * Change the name to something which can be pronounced (after I've made HGCFEU and FTDU it should be more English in name). The current name is directly 
-  taken from "Linux", "Image" and "Mtools".
+ * Change the name to something which can be pronounced (after I've made HGCFEU and FTDU it should be more English in name). The current name is directly taken from "Linux", "Image" and "Mtools".
 
 
 Links
 =======
 
  * https://www.gnu.org/software/mtools/ - GNU MTools home page
- * http://mcbx.netne.net - page with my software. Server may be periodically down.
+ * http://oldcomputer.info/software/ - page with my software. Server may be periodically down.
