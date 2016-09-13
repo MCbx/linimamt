@@ -19,7 +19,10 @@
 //////// MEMENTO ////////
 //      TODO LIST      //
 // New image in different formats
-// Drag-drop
+// Drag-drop:
+//   - implementation of actual actions in FLW (FileListWidget)
+//   - Implementation of dropping in DTW (DirTreeWidget)
+//   - implementation of actual actions in DTW (DirTreeWidget)
 // Boot sector preferences
 // Command-line parameters
 //Move in image
@@ -32,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    connect(ui->twFileTree,SIGNAL(sigDragDrop(QString,QString)),this,SLOT(on_fileDragDrop(QString,QString)));
     //VERIFY EXISTENCE OF MTOOLS!
     this->process=new QProcess(this);   //TO BE PORTED win
   //  this->process=new QProcess(this);
@@ -69,6 +73,7 @@ MainWindow::MainWindow(QWidget *parent) :
     leLabel->setEnabled(0);
     connect(leLabel,SIGNAL(editingFinished()),this,SLOT(on_label_edit()));
 
+    ui->twDirTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     //READ SETTINGS!
     this->loadSettings();
@@ -147,7 +152,7 @@ void MainWindow::closeEvent(QCloseEvent *clsEv)
 {
     if ((this->img!=NULL)&&(this->img->getModified()))
     {
-        //REMEMBER ABOUT SAVING QUESTION!
+        //TODO: REMEMBER ABOUT SAVING QUESTION!
 
     }
     this->saveSettings();
@@ -243,10 +248,10 @@ void MainWindow::on_actionOpen_triggered()
 int MainWindow::loadFile(QString fileName)
 {
     this->currentFile=fileName;
-    this->currentDir="::/";
     //Mantle interface
     this->img = new ImageFile(fileName);
-    this->dirs=this->img->getContents(currentDir);
+    ui->twFileTree->setImageFile(this->img);
+    this->dirs=this->img->getContents("::/");
     //Visualize directories
     this->visualize();
     this->visualizeModified();
@@ -264,9 +269,8 @@ int MainWindow::loadFile(QString fileName)
 //visualize trees
 void MainWindow::visualize()
 {
-    //TODO: Save position.
-    QString currentDir="";
-    QTreeWidgetItem * prev=NULL;
+    //Save position.
+    QString currentDir="::/"; //if you don't know what to do, use root directory. It always exists
     if (ui->twDirTree->selectedItems().count()>0)
     {
         currentDir=this->leAddress->text();
@@ -282,6 +286,7 @@ void MainWindow::visualize()
     treeItem->setText(0,"::/");
     treeItem->setText(1,"::/");
     treeItem->setIcon(0,QApplication::style()->standardIcon(QStyle::SP_DriveFDIcon));
+    QTreeWidgetItem * prev=treeItem; //previously selected - if nothing assume root.
     //traverse thru the list and find dirs. These dirs will be added
     foldery.append(treeItem);
     added.append("::/");
@@ -328,12 +333,16 @@ void MainWindow::visualize()
             int q=added.indexOf(pth);
             foldery.at(q)->addChild(sub);
             pth=pth1;
+            if (pth==currentDir)  //remember selection
+            {
+                prev=sub;
+            }
         }
     }
     ui->twDirTree->expandItem(treeItem);
     this->leLabel->setText(this->img->getLabel());
 
-    //TODO: Restore selected things as were.
+    //Restore selected things as were.
     if (prev!=NULL)
     {
         ui->twDirTree->setCurrentItem(prev);
@@ -381,6 +390,7 @@ void MainWindow::on_twDirTree_currentItemChanged(QTreeWidgetItem *current)
     }
     path="::/"+path;
     this->leAddress->setText(path);
+    ui->twFileTree->setCurrentDir(path);
     //QMessageBox::critical(this,"sss",path);
 
     //visualize files
@@ -477,8 +487,8 @@ void MainWindow::statusBarNormal()
         ui->actionExtract_selected->setEnabled(1);
         ui->actionDelete_selected->setEnabled(1);
         for (i=0;i<ui->twFileTree->selectedItems().count();i++)
-        {
-            si+=ui->twFileTree->selectedItems().at(i)->text(1).toInt();
+        { //the thing herer is to get number from "xx xxx" number string.
+            si+=ui->twFileTree->selectedItems().at(i)->text(1).replace(" ","").toInt();
         }
         sb+="Selected "+QString::number(i)+" item/s, occupying "+decNumber(si)+"B";
    }
@@ -568,7 +578,7 @@ void MainWindow::on_actionRename_triggered()
     this->img->moveFile(source,destination);
 
     //refresh
-    this->dirs=this->img->getContents(currentDir);
+    this->dirs=this->img->getContents("::/");
     //Visualize directories
     this->visualize();
     return;
@@ -583,7 +593,7 @@ void MainWindow::on_actionCreate_Directory_triggered()
         //show user some fancy thing
         QString destination = mkdirDialog->getText(this, "Create directory", "Folder name:", QLineEdit::Normal,
                                                "", &dialogResult);
-        if ((destination.length()==0)||(!dialogResult))
+        if ((destination.length()==0)||(!dialogResult))  //TODO: Filter all DOS-forbidden characters
         {
             this->statusBarNormal();
             return;
@@ -600,7 +610,7 @@ void MainWindow::on_actionCreate_Directory_triggered()
         this->img->makeFolder(destination);
 
         //refresh
-        this->dirs=this->img->getContents(currentDir);
+        this->dirs=this->img->getContents("::/");
         //Visualize directories
         this->visualize();
         return;
@@ -665,7 +675,7 @@ void MainWindow::on_actionExtract_selected_triggered()
 
 
     //refresh
-    this->dirs=this->img->getContents(currentDir);
+    this->dirs=this->img->getContents("::/");
     //Visualize directories
     this->visualize();
     this->statusBarNormal();
@@ -691,12 +701,17 @@ void MainWindow::on_actionDelete_selected_triggered()
      }
 
     //refresh
-    this->dirs=this->img->getContents(currentDir);
+    this->dirs=this->img->getContents("::/");
     //Visualize directories
     this->visualize();
     this->statusBarNormal();
     return;
 
+}
+
+void MainWindow::on_fileDragDrop(QString from, QString to)
+{
+    QMessageBox::critical(this,"Drag",from+" into "+to);
 }
 
 //Copy files from filesystem into image. This must be split between dir/file
@@ -738,7 +753,7 @@ void MainWindow::on_actionAdd_triggered()
     }
 
     //refresh
-    this->dirs=this->img->getContents(currentDir);
+    this->dirs=this->img->getContents("::/");
     //Visualize directories
     this->visualize();
     this->statusBarNormal();
@@ -804,7 +819,7 @@ void MainWindow::on_actionAdd_Directories_triggered()
             this->img->copyFile(fileName,this->leAddress->text());
 
     //refresh
-    this->dirs=this->img->getContents(currentDir);
+    this->dirs=this->img->getContents("::/");
     //Visualize directories
     this->visualize();
     this->statusBarNormal();

@@ -54,11 +54,11 @@ private slots:
 
     void on_actionAdd_Directories_triggered();
 
+    void on_fileDragDrop(QString from, QString to);
 private:
     Ui::MainWindow *ui;
     QProcess *process;
     QString currentFile;
-    QString currentDir;
     ImageFile * img;
 
     //structure
