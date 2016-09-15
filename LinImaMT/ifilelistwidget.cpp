@@ -1,5 +1,6 @@
 #include "ifilelistwidget.h"
 #include <QMessageBox>
+#include <QFileInfo>
 
 void IFileListWidget::setImageFile(ImageFile *img)
 {
@@ -18,7 +19,8 @@ bool IFileListWidget::dropMimeData(QTreeWidgetItem *parent, int index, const QMi
     QString dest=currentDir;
     if (this->destination!=NULL)
     {
-        dest=this->currentDir+this->destination->text(0);
+       // dest=this->currentDir+this->destination->text(0);
+        dest=this->destination->text(4);
     }
 
     urlList = data->urls(); // retrieve list of urls
@@ -30,18 +32,20 @@ bool IFileListWidget::dropMimeData(QTreeWidgetItem *parent, int index, const QMi
             QString source=url.toString();
             if (!url.isLocalFile())
             {
-                source=this->currentDir+source;
+                source=url.path();
             }
             if (source!=dest) //multiselect + dragging file to sel folder
             {
-                //launch
+                //launch what should be launched
                 emit sigDragDrop(source,dest);
             }
             this->clearSelection(); //without it it will lock into multiselect
         }
     }
 
-    this->setCurrentItem(destination);
+  //  if (this->destination!=NULL)
+   //     this->setCurrentItem(destination);
+
     return true;
 }
 
@@ -99,7 +103,7 @@ void IFileListWidget::performDrag()
             QMimeData *mimeData = new QMimeData;
             QList<QUrl> list;
             for (int i=0;i<this->selectedItems().count();i++)
-                list.append(QUrl(this->selectedItems().at(i)->text(0)));
+                list.append(QUrl(this->selectedItems().at(i)->text(4)));
 
             mimeData->setUrls(list);
             QDrag *drag = new QDrag(this);

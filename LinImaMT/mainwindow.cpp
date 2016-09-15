@@ -20,15 +20,13 @@
 //      TODO LIST      //
 // New image in different formats
 // Drag-drop:
-//   - implementation of actual actions in FLW (FileListWidget)
-//   - Implementation of dropping in DTW (DirTreeWidget)
-//   - implementation of actual actions in DTW (DirTreeWidget)
+//   - implementation of extracting
 // Boot sector preferences
+// GRAPHICAL INTERFACE!
+// revamp error dialog to use sessions
 // Command-line parameters
-//Move in image
-//Copy in image
-//attributes
-//Mess with metadata!
+// attributes
+// Mess with metadata!
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -36,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->twFileTree,SIGNAL(sigDragDrop(QString,QString)),this,SLOT(on_fileDragDrop(QString,QString)));
+    connect(ui->twDirTree,SIGNAL(sigDragDrop(QString,QString)),this,SLOT(on_fileDragDrop(QString,QString)));
     //VERIFY EXISTENCE OF MTOOLS!
     this->process=new QProcess(this);   //TO BE PORTED win
   //  this->process=new QProcess(this);
@@ -277,21 +276,21 @@ void MainWindow::visualize()
     }
 
     ui->twDirTree->clear();
-    ui->twFileTree->clear();
+    ui->twFileTree->clear(); //clear views
 
-    QList<QTreeWidgetItem*> foldery;
-    QStringList added;
+    QList<QTreeWidgetItem*> foldery; //tree widget items list of directories
+    QStringList added;  //this is the list of already added directory items
 
-    QTreeWidgetItem *treeItem = new QTreeWidgetItem(ui->twDirTree);
+    QTreeWidgetItem *treeItem = new QTreeWidgetItem(ui->twDirTree); //prepare root entry
     treeItem->setText(0,"::/");
-    treeItem->setText(1,"::/");
+    treeItem->setText(1,"::/"); //text at 1 is the full path, this is not visible at all but is used in drag-drop
     treeItem->setIcon(0,QApplication::style()->standardIcon(QStyle::SP_DriveFDIcon));
     QTreeWidgetItem * prev=treeItem; //previously selected - if nothing assume root.
     //traverse thru the list and find dirs. These dirs will be added
-    foldery.append(treeItem);
-    added.append("::/");
+    foldery.append(treeItem); //add root to list
+    added.append("::/"); //add root to paths list. This list saves time when searching for duplicates
 
-    QStringList names;
+    QStringList names; //prepare list of directories in a whole image
     for (int i=0;i<this->dirs.count();i++)
     {
         if (this->dirs[i].attrib.at(0)=='D')
@@ -307,7 +306,7 @@ void MainWindow::visualize()
         if (names.at(i).contains(names.at(i-1)))
             names[i-1]="";
     }
-    qSort(names.begin(),names.end());
+    qSort(names.begin(),names.end()); //remove duplicates
 
 
     for (int i=0;i<names.count();i++)   //create tree from folders
@@ -320,7 +319,8 @@ void MainWindow::visualize()
         {
             QString pth1=pth+folders.at(j)+"/";
             QTreeWidgetItem * sub = new QTreeWidgetItem();
-            sub->setText(0,folders.at(j));
+            sub->setText(0,folders.at(j)); //add dir name of item
+            sub->setText(1,pth1); //add full path of each item
             sub->setIcon(0,QApplication::style()->standardIcon(QStyle::SP_DirClosedIcon));
             if (added.indexOf(pth1)>-1) //if we have such animal, skip it,
             {
@@ -404,9 +404,12 @@ void MainWindow::on_twDirTree_currentItemChanged(QTreeWidgetItem *current)
             entry->setText(1,decNumber(dirs[i].size));
             entry->setText(2,dirs[i].attrib);
             entry->setText(3,dirs[i].date);
-            entry->setText(4,dirs[i].name);
+            entry->setText(4,dirs[i].name); //this is not visible and is used for drag-drop
             if (dirs[i].attrib.at(0)=='D')
+            {
                 entry->setIcon(0,QApplication::style()->standardIcon(QStyle::SP_DirClosedIcon));
+                entry->setText(4,dirs[i].name+"/"); //this is not visible and is used for drag-drop
+            }
             else
                 entry->setIcon(0,QApplication::style()->standardIcon(QStyle::SP_FileIcon));
 
@@ -497,7 +500,7 @@ void MainWindow::statusBarNormal()
        QTreeWidgetItemIterator it(ui->twFileTree);
        while (*it)
        {
-        si+=(*it)->text(1).toInt();
+        si+=(*it)->text(1).replace(" ","").toInt();
         ++it;
        }
        sb+=QString::number(ui->twFileTree->topLevelItemCount())+" item/s, occupying "+decNumber(si)+"B";
@@ -709,9 +712,37 @@ void MainWindow::on_actionDelete_selected_triggered()
 
 }
 
+//this executes if valid content is dropped in valid place.
 void MainWindow::on_fileDragDrop(QString from, QString to)
 {
-    QMessageBox::critical(this,"Drag",from+" into "+to);
+   // QMessageBox::critical(this,"Drag",from+" into "+to);
+
+
+    //We have the following situations:
+    //1. Inside image - we move files
+    //2. anything outside image - we copy files.
+    //This is really bad, but Qt can't use ctrl, and we can't launch menu
+    //as its position is always screwed up only in KDE.
+
+    if ((from.startsWith("file://"))||(to.startsWith("file://")))
+    {
+        //copy
+        from=from.replace("file://","");
+        to=to.replace("file://","");
+        this->img->copyFile(from,to);
+    }
+    else
+    {
+        //move
+        this->img->moveFile(from,to);
+    }
+
+    //refresh
+    this->dirs=this->img->getContents("::/");
+    //Visualize directories
+    this->visualize();
+    this->statusBarNormal();
+    return;
 }
 
 //Copy files from filesystem into image. This must be split between dir/file

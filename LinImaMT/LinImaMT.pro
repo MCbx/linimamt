@@ -16,12 +16,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     errordialog.cpp \
     imagefile.cpp \
-    ifilelistwidget.cpp
+    ifilelistwidget.cpp \
+    idirtreewidget.cpp
 
 HEADERS  += mainwindow.h \
     errordialog.h \
     imagefile.h \
-    ifilelistwidget.h
+    ifilelistwidget.h \
+    idirtreewidget.h
 
 FORMS    += mainwindow.ui \
     errordialog.ui

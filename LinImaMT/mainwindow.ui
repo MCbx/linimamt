@@ -47,7 +47,7 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QTreeWidget" name="twDirTree">
+      <widget class="IDirTreeWidget" name="twDirTree">
        <property name="horizontalScrollBarPolicy">
         <enum>Qt::ScrollBarAsNeeded</enum>
        </property>
@@ -354,6 +354,11 @@
    <class>IFileListWidget</class>
    <extends>QTreeWidget</extends>
    <header>ifilelistwidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>IDirTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>idirtreewidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
