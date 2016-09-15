@@ -193,6 +193,12 @@
    </attribute>
    <addaction name="actionNew"/>
    <addaction name="actionOpen"/>
+   <addaction name="actionSave"/>
+   <addaction name="separator"/>
+   <addaction name="actionExtract_selected"/>
+   <addaction name="actionAdd"/>
+   <addaction name="actionAdd_Directories"/>
+   <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="tbAddressBar">

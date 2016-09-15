@@ -51,8 +51,35 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
         this->freeSpace=0;
         this->usedSpace=0;
         QList<ImageFile::fileEntry> dirs;
-        QString op;
-        int status=this->execute("mdir","-/ -a \""+home+"\"",op);
+        QString op="";
+
+        //When image is blank, mtools returns error. First, we will make a dumb try to read root directory.
+        int status=this->execute("mdir","-a \""+home+"\"",op);
+        if (op.contains("Directory for ::/")&&op.contains("No files"))
+        {
+            //we are in this situation
+            //the only thing we will get: Label, serial, bytes free. Nothing more.
+            QStringList lines = op.split('\n');
+            QString tmp=lines[0];
+            this->label=tmp.mid(tmp.indexOf("is")+3);
+            if (this->label.contains("has no label",Qt::CaseInsensitive))
+            {
+                this->label="";
+            }
+            tmp=lines[1];
+            this->serial=tmp.mid(tmp.indexOf("is")+3);
+
+            if (lines[5].indexOf("bytes free")>=0)
+            {
+                QString a=lines[5];
+                a=a.replace("bytes free","").trimmed();
+                a=a.replace(" ","");
+                this->freeSpace=a.toInt();
+            }
+            return dirs;
+        }
+
+        status=this->execute("mdir","-/ -a \""+home+"\"",op);
         if (status!=0)
         {
             errorMessage("Failed to acquire listing, code: "+QString::number(status),op);
@@ -86,23 +113,23 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
         QString myHome;
         while (lineCount<lines.count())
         {
-            if ((lines[lineCount].length()==0)||(lines[lineCount].indexOf("files       ")>0)||
+            if ((lines[lineCount].length()==0)||(lines[lineCount].indexOf("files       ")>0)||(lines[lineCount].indexOf("file        ")>0) ||
                     (lines[lineCount].indexOf(".            <DIR>")>=0)||
                        (lines[lineCount].indexOf("..           <DIR>")>=0))
             {
                 lineCount++;
                 continue;
             }
-            if (lines[lineCount].indexOf("Total files listed:")>=0)
-            {
+          //  if (lines[lineCount].indexOf("Total files listed:")>=0)
+          //  {
 
-                QString a=lines[lineCount+2];
-                a=a.replace("bytes free","").trimmed();
-                a=a.replace(" ","");
-                this->freeSpace=a.toInt();
-                break;
-            }
-            if (lines[lineCount].indexOf("bytes free")>=0)
+          //      QString a=lines[lineCount+2];
+          //      a=a.replace("bytes free","").trimmed();
+          //      a=a.replace(" ","");
+          //      this->freeSpace=a.toInt();
+          //      break;
+          //  }
+            if ((lines[lineCount].indexOf("bytes free")>=0)&&(lines[lineCount].startsWith("      ")))
             {
                 QString a=lines[lineCount];
                 a=a.replace("bytes free","").trimmed();
