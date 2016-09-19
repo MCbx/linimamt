@@ -15,6 +15,7 @@
 #include "errordialog.h"
 #include <QFileInfo>
 #include <QSettings>
+#include "attribute.h"
 
 //////// MEMENTO ////////
 //      TODO LIST      //
@@ -22,10 +23,8 @@
 // Drag-drop:
 //   - implementation of extracting
 // Boot sector preferences
-// GRAPHICAL INTERFACE!
 // revamp error dialog to use sessions
 // Command-line parameters
-// attributes
 // Mess with metadata!
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -37,7 +36,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->twDirTree,SIGNAL(sigDragDrop(QString,QString)),this,SLOT(on_fileDragDrop(QString,QString)));
     //VERIFY EXISTENCE OF MTOOLS!
     this->process=new QProcess(this);   //TO BE PORTED win
-  //  this->process=new QProcess(this);
     this->process->start("which mtools");
     this->process->waitForFinished();
     if (this->process->exitCode()!=0)
@@ -261,6 +259,7 @@ int MainWindow::loadFile(QString fileName)
     ui->actionCreate_Directory->setEnabled(1);
     ui->actionVolume_Serial->setEnabled(1);
     ui->actionAdd->setEnabled(1);
+    ui->actionAttributes->setEnabled(1);
     ui->actionAdd_Directories->setEnabled(1);   //TODO: Create "ArmUI" and "DisarmUI" functions with this stuff
     return 0;
 }
@@ -510,10 +509,12 @@ void MainWindow::statusBarNormal()
    if (ui->twFileTree->selectedItems().count()==1)
    {
        ui->actionRename->setEnabled(1);
+       ui->actionAttributes->setEnabled(1);
        ui->actionExtract_selected->setEnabled(1);
    }
    if (ui->twFileTree->selectedItems().count()==0)
    {
+       ui->actionAttributes->setEnabled(0);
        ui->actionRename->setEnabled(0);
        ui->actionExtract_selected->setEnabled(0);
        ui->actionDelete_selected->setEnabled(0);
@@ -848,6 +849,45 @@ void MainWindow::on_actionAdd_Directories_triggered()
             ui->statusBar->showMessage("Adding "+fileName);
             QApplication::processEvents();
             this->img->copyFile(fileName,this->leAddress->text());
+
+    //refresh
+    this->dirs=this->img->getContents("::/");
+    //Visualize directories
+    this->visualize();
+    this->statusBarNormal();
+    return;
+}
+
+void MainWindow::on_actionAttributes_triggered()
+{
+    QList<QString> attributes;
+    QList<QString> files;
+    //get attributes of selected things
+    for (int i=0;i<ui->twFileTree->selectedItems().count();i++)
+    {
+         QString fileAttr=ui->twFileTree->selectedItems().at(i)->text(2);
+         QString fileName=ui->twFileTree->selectedItems().at(i)->text(0);
+         attributes.append(fileAttr);
+         files.append(fileName);
+    }
+
+    Attribute * a = new Attribute(attributes,this);
+    a->exec();
+    if (a->result=="")
+    {
+        return;
+    }
+
+    bool recursive=0;
+    if (a->result.at(0)!='-')
+        recursive=1;
+    QString attribs = a->result.right(4);
+
+    for (int i=0;i<files.count();i++)
+    {
+        this->img->setAttrbute(this->leAddress->text()+files.at(i),recursive,attribs);
+    }
+
 
     //refresh
     this->dirs=this->img->getContents("::/");

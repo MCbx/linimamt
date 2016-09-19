@@ -30,6 +30,7 @@ public:
     QString getSerial();
     QString setLabel(QString label);
     void setSerial(QString serial);
+    void setAttrbute(QString file, bool recursive, QString attribs);
     bool getModified();
 
     int saveFile(QString fileName);

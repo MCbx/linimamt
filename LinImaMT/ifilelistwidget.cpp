@@ -106,6 +106,7 @@ void IFileListWidget::performDrag()
                 list.append(QUrl(this->selectedItems().at(i)->text(4)));
 
             mimeData->setUrls(list);
+
             QDrag *drag = new QDrag(this);
             drag->setMimeData(mimeData);
             drag->start(Qt::CopyAction | Qt::MoveAction);

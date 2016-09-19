@@ -55,6 +55,8 @@ private slots:
     void on_actionAdd_Directories_triggered();
 
     void on_fileDragDrop(QString from, QString to);
+    void on_actionAttributes_triggered();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;

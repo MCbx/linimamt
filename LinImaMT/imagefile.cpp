@@ -120,15 +120,15 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
                 lineCount++;
                 continue;
             }
-          //  if (lines[lineCount].indexOf("Total files listed:")>=0)
-          //  {
+            if (lines[lineCount].indexOf("Total files listed:")>=0)
+            {
 
-          //      QString a=lines[lineCount+2];
-          //      a=a.replace("bytes free","").trimmed();
-          //      a=a.replace(" ","");
-          //      this->freeSpace=a.toInt();
-          //      break;
-          //  }
+                QString a=lines[lineCount+2];
+                a=a.replace("bytes free","").trimmed();
+                a=a.replace(" ","");
+                this->freeSpace=a.toInt();
+                break;
+            }
             if ((lines[lineCount].indexOf("bytes free")>=0)&&(lines[lineCount].startsWith("      ")))
             {
                 QString a=lines[lineCount];
@@ -401,4 +401,44 @@ int ImageFile::saveFile(QString fileName)
         return 0;
     }
     //if name is specified, just copy the file.
+}
+
+void ImageFile::setAttrbute(QString file, bool recursive, QString attribs)
+{
+    //set attributes. Letter - is, dash - remove, X - doesn't matter.
+    this->prepareForModify();
+
+    QString attributes="";
+    if (attribs.at(0)=='-')
+        attributes+=" -a";
+    if (attribs.at(0)=='a')
+        attributes+=" +a";
+    if (attribs.at(1)=='-')
+        attributes+=" -r";
+    if (attribs.at(1)=='r')
+        attributes+=" +r";
+    if (attribs.at(2)=='-')
+        attributes+=" -h";
+    if (attribs.at(2)=='h')
+        attributes+=" +h";
+    if (attribs.at(3)=='-')
+        attributes+=" -s";
+    if (attribs.at(3)=='s')
+        attributes+=" +s";
+
+    if (recursive)
+        attributes+=" -/";
+    attributes=attributes.trimmed();
+
+    QString op="";
+    int status=this->execute("mattrib", attributes+" \""+file+"\"",op);
+
+    if (status!=0)
+    {
+        errorMessage("Failed to set attribute. Code "+QString::number(status),op);
+        return;
+    }
+
+    this->modified=1;
+    return;
 }

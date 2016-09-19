@@ -17,13 +17,19 @@ SOURCES += main.cpp\
     errordialog.cpp \
     imagefile.cpp \
     ifilelistwidget.cpp \
-    idirtreewidget.cpp
+    idirtreewidget.cpp \
+    attribute.cpp
 
 HEADERS  += mainwindow.h \
     errordialog.h \
     imagefile.h \
     ifilelistwidget.h \
-    idirtreewidget.h
+    idirtreewidget.h \
+    attribute.h
 
 FORMS    += mainwindow.ui \
-    errordialog.ui
+    errordialog.ui \
+    attribute.ui
+
+RESOURCES += \
+    resources.qrc
