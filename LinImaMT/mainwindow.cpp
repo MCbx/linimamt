@@ -152,6 +152,7 @@ void MainWindow::closeEvent(QCloseEvent *clsEv)
         //TODO: REMEMBER ABOUT SAVING QUESTION!
 
     }
+    if (this->img) this->img->disposeFile();
     this->saveSettings();
     this->close();
 }
@@ -246,6 +247,7 @@ int MainWindow::loadFile(QString fileName)
 {
     this->currentFile=fileName;
     //Mantle interface
+    if (this->img) this->img->disposeFile();
     this->img = new ImageFile(fileName);
     ui->twFileTree->setImageFile(this->img);
     this->dirs=this->img->getContents("::/");

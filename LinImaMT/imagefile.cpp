@@ -6,9 +6,22 @@
 
 ImageFile::ImageFile(QString imagePath)
 {
+    this->tmpF=NULL;
     this->currentPath=imagePath;
     this->originalPath=imagePath;
     this->modified=0;
+}
+
+void ImageFile::disposeFile()
+{
+    if (this->tmpF!=NULL)
+    {
+      //  if (this->currentPath==this->tmpF->fileName())
+        if (this->tmpF->exists())
+        {
+            this->tmpF->remove();
+        }
+    }
 }
 
 int ImageFile::getFreeSpace()

@@ -18,6 +18,7 @@ public:
 
     ImageFile(QString imagePath); //open existing
   //  ImageFile(int imageSize);   //create new
+    void disposeFile(); //disposes temp file
     int copyFile(QString source, QString destination);
     int moveFile(QString source, QString destination);
     int deleteFile(QString source);
