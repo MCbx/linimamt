@@ -21,23 +21,25 @@ GPL. Needs GPL Mtools.
 Working
 ===========
 Which means: Now working, and probably has to be fixed on some edge cases:
-* Opening and saving modified image file,
+* Creating, opening and saving modified image file,
 * Changing disk label and serial number
 * Browsing image file structure
-* Extracting files/directories
-* Adding files/directories
+* Extracting files/directories, with partial drag and drop
+* Adding files/directories, creating directories
 * Renaming
 * Deleting
+* Setting attributes
 
 
 Todo
 =========
 Most important things to do (except these in "MEMENTO" and "TODO" sections in source code):
- * Drag-drop
- * New image option
- * ARTWORK! (toolbar should look more like a GUI)
+ * Drag-drop should work better
+ * Maybe messing with metadata
+ * Hard disk image support, at least partial.
+ * Image formats conversion, defragmenting, wiping free space
+ * Analysis functions could be nice, at least to transplant boot sectors.
  * Refactoring code. This window class with everything thrown into it doesn't look good.
- * Attribute editing, maybe messing with metadata
  * Do something with directory structure visualization code as it's quite bad now.
  * Change the name to something which can be pronounced (after I've made HGCFEU and FTDU it should be more English in name). The current name is directly taken from "Linux", "Image" and "Mtools".
 
@@ -46,4 +48,5 @@ Links
 =======
 
  * https://www.gnu.org/software/mtools/ - GNU MTools home page
+ * https://www.gnu.org/software/mtools/manual/mtools.html - GNU Mtools manual
  * http://oldcomputer.info/software/ - page with my software. Server may be periodically down.
