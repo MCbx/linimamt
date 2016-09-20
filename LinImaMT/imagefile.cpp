@@ -12,6 +12,31 @@ ImageFile::ImageFile(QString imagePath)
     this->modified=0;
 }
 
+ImageFile::ImageFile(int imageSize, QString imageInit)
+{
+    this->modified=0;
+    if (imageSize<0)
+            return;
+    //create new tmp file
+    this->tmpF = new QTemporaryFile(QDir::temp().absoluteFilePath("imaXXXXXXXX.img"));
+    this->tmpF->open();
+    this->tmpF->close();
+    //change current path to temporary file
+    this->currentPath=this->tmpF->fileName();
+    this->originalPath=this->currentPath; //temporary hack
+
+    //execute mtools formatter on tmp file
+    QString op;
+    int status=this->execute("mformat",imageInit,op);
+    if (status!=0)
+    {
+        errorMessage("Failed to format the image. Code "+QString::number(status),op);
+        return;
+    }
+    this->modified=1;
+    return;
+}
+
 void ImageFile::disposeFile()
 {
     if (this->tmpF!=NULL)

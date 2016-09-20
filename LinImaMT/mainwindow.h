@@ -57,6 +57,10 @@ private slots:
     void on_fileDragDrop(QString from, QString to);
     void on_actionAttributes_triggered();
 
+    void on_actionNew_triggered();
+
+    void on_twFileTree_customContextMenuRequested(const QPoint &pos);
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;
@@ -77,6 +81,7 @@ private:
     void visualizeModified();
     void saveSettings();
     void loadSettings();
+    void enableUI(bool state);
 
     //ui components
     QLineEdit * leAddress;

@@ -16,16 +16,33 @@
 #include <QFileInfo>
 #include <QSettings>
 #include "attribute.h"
+#include "newimage.h"
 
 //////// MEMENTO ////////
 //      TODO LIST      //
-// New image in different formats
+//Saving question
 // Drag-drop:
 //   - implementation of extracting
 // Boot sector preferences
 // revamp error dialog to use sessions
 // Command-line parameters
 // Mess with metadata!
+//Wipe free space
+
+//these need mounting to letters
+//Convert image between formats by mounting two images and moving files between
+// - derivative - defrag image - by converting format on itself
+//Open hard disk images - partition mounting
+
+//to open hard disk image:
+// - configuration file:
+// drive c: file="/path/to/file.img" partition=1
+// or partition=2,3,4.
+// Only primary partitions are supported.
+// Config file should be pointed by $MTOOLSRC variable.
+// e.g. execute this: env MTOOLSRC="/tmp/mtoolsrc" mdir c:/
+// will give hd listing.
+// Make unique config file name as user may launch many instances.
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -89,7 +106,31 @@ MainWindow::~MainWindow()
 //shows asterisk if file is modified
 void MainWindow::visualizeModified()
 {
+    //show window title
+
     QString wt=this->windowTitle();
+    if (this->img==NULL)
+    {
+        setWindowTitle("LinimaMT");
+        return;
+    }
+    else
+    {
+        if (this->currentFile=="")
+        {
+            this->setWindowTitle("LinimaMT - [untitled]");
+        }
+        else
+        {
+            this->setWindowTitle("LinimaMT - ["+this->currentFile+"]");
+        }
+    }
+    if (wt.at(wt.length()-1)=='*')
+    {
+        this->setWindowTitle(this->windowTitle()+" *");
+    }
+
+    wt=this->windowTitle();
     if (this->img->getModified())
     {
         if (wt.at(wt.length()-1)!='*')
@@ -245,6 +286,7 @@ void MainWindow::on_actionOpen_triggered()
 //load file
 int MainWindow::loadFile(QString fileName)
 {
+    this->enableUI(0);
     this->currentFile=fileName;
     //Mantle interface
     if (this->img) this->img->disposeFile();
@@ -256,13 +298,7 @@ int MainWindow::loadFile(QString fileName)
     this->visualizeModified();
     ui->twDirTree->setCurrentItem(ui->twDirTree->topLevelItem(0));  //select first item. Do not remove this.
         ui->twFileTree->setDragDropMode(QTreeWidget::DragDrop);
-    this->leLabel->setEnabled(1);
-    ui->actionSave_As->setEnabled(1);
-    ui->actionCreate_Directory->setEnabled(1);
-    ui->actionVolume_Serial->setEnabled(1);
-    ui->actionAdd->setEnabled(1);
-    ui->actionAttributes->setEnabled(1);
-    ui->actionAdd_Directories->setEnabled(1);   //TODO: Create "ArmUI" and "DisarmUI" functions with this stuff
+    this->enableUI(1);
     return 0;
 }
 
@@ -488,8 +524,10 @@ void MainWindow::statusBarNormal()
    if (ui->twFileTree->selectedItems().count()>0)
    {
         int i;
+        ui->actionRename->setEnabled(0);
         ui->actionExtract_selected->setEnabled(1);
         ui->actionDelete_selected->setEnabled(1);
+        ui->actionAttributes->setEnabled(1);
         for (i=0;i<ui->twFileTree->selectedItems().count();i++)
         { //the thing herer is to get number from "xx xxx" number string.
             si+=ui->twFileTree->selectedItems().at(i)->text(1).replace(" ","").toInt();
@@ -540,16 +578,23 @@ void MainWindow::on_actionSave_As_triggered()
             &&(!fname.endsWith("dsk",Qt::CaseInsensitive))&&(!fname.endsWith("raw",Qt::CaseInsensitive)))
         fname=fname+".img";
 
-    if (fname!="")
+    if (fname!=".img")
     {
         this->img->saveFile(fname);
+        this->currentFile=fname;
+        visualizeModified();
     }
-    visualizeModified();
+
 }
 
 //Just save. Img will copy all things needed.
 void MainWindow::on_actionSave_triggered()
 {
+    if (this->currentFile=="")
+    {
+        this->on_actionSave_As_triggered();
+        return;
+    }
     this->img->saveFile("");
     visualizeModified();
 }
@@ -897,4 +942,69 @@ void MainWindow::on_actionAttributes_triggered()
     this->visualize();
     this->statusBarNormal();
     return;
+}
+
+void MainWindow::on_actionNew_triggered()
+{
+    //REMEMBER THE SAVING QUESTION!
+
+    enableUI(0);
+    ui->twFileTree->clear();
+    ui->twDirTree->clear();
+    //new image dialog
+    newImage * n = new newImage(this);
+    n->exec();
+    if (n->result=="")
+    {
+        return;
+    }
+
+    this->currentFile="";
+
+    if (this->img) this->img->disposeFile();
+    this->img=new ImageFile (0,n->result);
+
+    if (!this->img->getModified())
+    {
+        return;
+    }
+
+    this->dirs=this->img->getContents("::/");
+    //Visualize directories
+    this->visualize();
+    this->visualizeModified();
+    ui->twDirTree->setCurrentItem(ui->twDirTree->topLevelItem(0));  //select first item. Do not remove this.
+        ui->twFileTree->setDragDropMode(QTreeWidget::DragDrop);
+    enableUI(1);
+    return;
+}
+
+//enables/disables UI elements coordinated with image modification.
+void MainWindow::enableUI(bool state)
+{
+    this->leLabel->setEnabled(state);
+    ui->actionSave_As->setEnabled(state);
+    ui->actionCreate_Directory->setEnabled(state);
+    ui->actionVolume_Serial->setEnabled(state);
+    ui->actionAdd->setEnabled(state);
+    ui->actionAttributes->setEnabled(state);
+    ui->actionAdd_Directories->setEnabled(state);   //TODO: Create "ArmUI" and "DisarmUI" functions with this stuff
+}
+
+
+//File listing context menu
+void MainWindow::on_twFileTree_customContextMenuRequested(const QPoint &pos)
+{
+    //Prepare context menu
+    QMenu menu(this);
+    menu.addAction(ui->actionExtract_selected);
+    menu.addAction(ui->actionAdd);
+    menu.addAction(ui->actionAdd_Directories);
+    menu.addSeparator();
+    menu.addAction(ui->actionCreate_Directory);
+    menu.addAction(ui->actionRename);
+    menu.addAction(ui->actionDelete_selected);
+    menu.addAction(ui->actionAttributes);
+
+    menu.exec(ui->twFileTree->mapToGlobal(pos));
 }
