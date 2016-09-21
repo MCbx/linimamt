@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     ifilelistwidget.cpp \
     idirtreewidget.cpp \
     attribute.cpp \
-    newimage.cpp
+    newimage.cpp \
+    bootsector.cpp
 
 HEADERS  += mainwindow.h \
     errordialog.h \
@@ -27,12 +28,14 @@ HEADERS  += mainwindow.h \
     ifilelistwidget.h \
     idirtreewidget.h \
     attribute.h \
-    newimage.h
+    newimage.h \
+    bootsector.h
 
 FORMS    += mainwindow.ui \
     errordialog.ui \
     attribute.ui \
-    newimage.ui
+    newimage.ui \
+    bootsector.ui
 
 RESOURCES += \
     resources.qrc
