@@ -82,6 +82,7 @@ private:
     void saveSettings();
     void loadSettings();
     void enableUI(bool state);
+    int askForSave();
 
     //ui components
     QLineEdit * leAddress;

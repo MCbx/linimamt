@@ -20,7 +20,6 @@
 
 //////// MEMENTO ////////
 //      TODO LIST      //
-//Saving question
 // Drag-drop:
 //   - implementation of extracting
 // Boot sector preferences
@@ -186,12 +185,35 @@ void MainWindow::on_actionExit_triggered()
     this->close();
 }
 
+//Display question about saving
+int MainWindow::askForSave()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "File modified","Do you want to save before closing the file?",QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+    if (reply==QMessageBox::Yes)
+        return 1;
+    if (reply==QMessageBox::No)
+        return 0;
+    if (reply==QMessageBox::Cancel)
+        return -1;
+    return 2;
+}
+
 void MainWindow::closeEvent(QCloseEvent *clsEv)
 {
     if ((this->img!=NULL)&&(this->img->getModified()))
     {
-        //TODO: REMEMBER ABOUT SAVING QUESTION!
-
+        int k=askForSave();
+        if (k==-1)
+        {
+            clsEv->ignore();
+            return;
+        }
+        if (k==1)
+        {
+            ui->actionSave->trigger();
+        }
+        clsEv->accept();
     }
     if (this->img) this->img->disposeFile();
     this->saveSettings();
@@ -270,8 +292,15 @@ void MainWindow::on_actionOpen_triggered()
 {
     if ((this->img!=NULL)&&(this->img->getModified()))
     {
-        //REMEMBER ABOUT SAVING QUESTION!
-
+        int k=askForSave();
+        if (k==-1)
+        {
+            return;
+        }
+        if (k==1)
+        {
+            ui->actionSave->trigger();
+        }
     }
     QString fname = QFileDialog::getOpenFileName(this,"Open Image","","Disk Images (*.ima *.dsk *.img);;All files (*)");
     if (fname!="")
@@ -280,6 +309,7 @@ void MainWindow::on_actionOpen_triggered()
         QApplication::processEvents();
         this->loadFile(fname);
         //we don't need to refresh status bar as it has been done with visualization
+
     }
 }
 
@@ -293,6 +323,15 @@ int MainWindow::loadFile(QString fileName)
     this->img = new ImageFile(fileName);
     ui->twFileTree->setImageFile(this->img);
     this->dirs=this->img->getContents("::/");
+    if ((this->img->getFreeSpace()==0)&&(this->img->getUsedSpace()==0)&&(this->img->getSerial()==""))
+    {
+        ui->twFileTree->clear();
+        ui->twDirTree->clear();
+        this->leAddress->setText("::/");
+        this->leLabel->clear();
+        this->setWindowTitle("LinImaMT");
+        return 0;
+    }
     //Visualize directories
     this->visualize();
     this->visualizeModified();
@@ -946,11 +985,19 @@ void MainWindow::on_actionAttributes_triggered()
 
 void MainWindow::on_actionNew_triggered()
 {
-    //REMEMBER THE SAVING QUESTION!
+    if ((this->img!=NULL)&&(this->img->getModified()))
+    {
+        int k=askForSave();
+        if (k==-1)
+        {
+            return;
+        }
+        if (k==1)
+        {
+            ui->actionSave->trigger();
+        }
+    }
 
-    enableUI(0);
-    ui->twFileTree->clear();
-    ui->twDirTree->clear();
     //new image dialog
     newImage * n = new newImage(this);
     n->exec();
@@ -958,6 +1005,11 @@ void MainWindow::on_actionNew_triggered()
     {
         return;
     }
+    enableUI(0);
+    ui->twFileTree->clear();
+    ui->twDirTree->clear();
+    this->leLabel->clear();
+    this->leAddress->setText("::/");
 
     this->currentFile="";
 

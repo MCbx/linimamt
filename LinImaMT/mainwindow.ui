@@ -155,14 +155,16 @@
     <property name="title">
      <string>Image</string>
     </property>
-    <addaction name="actionRename"/>
-    <addaction name="actionCreate_Directory"/>
-    <addaction name="actionVolume_Serial"/>
     <addaction name="actionExtract_selected"/>
-    <addaction name="actionDelete_selected"/>
     <addaction name="actionAdd"/>
     <addaction name="actionAdd_Directories"/>
+    <addaction name="separator"/>
+    <addaction name="actionCreate_Directory"/>
+    <addaction name="actionDelete_selected"/>
+    <addaction name="actionRename"/>
     <addaction name="actionAttributes"/>
+    <addaction name="separator"/>
+    <addaction name="actionVolume_Serial"/>
    </widget>
    <widget class="QMenu" name="menuDisk">
     <property name="title">
