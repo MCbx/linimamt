@@ -292,8 +292,11 @@
    </property>
   </action>
   <action name="actionVolume">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
-    <string>Volume...</string>
+    <string>Boot sector...</string>
    </property>
   </action>
   <action name="actionSave">

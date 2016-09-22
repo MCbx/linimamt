@@ -17,6 +17,7 @@
 #include <QSettings>
 #include "attribute.h"
 #include "newimage.h"
+#include "bootsector.h"
 
 //////// MEMENTO ////////
 //      TODO LIST      //
@@ -152,7 +153,7 @@ void MainWindow::visualizeModified()
 //edit label
 void MainWindow::on_label_edit()
 {
-    this->leLabel->setText(this->leLabel->text().toUpper());
+    this->leLabel->setText(this->leLabel->text().trimmed());
     if (this->img->getLabel()!=this->leLabel->text())
     {
         this->img->setLabel(this->leLabel->text());
@@ -416,7 +417,7 @@ void MainWindow::visualize()
         }
     }
     ui->twDirTree->expandItem(treeItem);
-    this->leLabel->setText(this->img->getLabel());
+    this->leLabel->setText(this->img->getLabel().trimmed());
 
     //Restore selected things as were.
     if (prev!=NULL)
@@ -1040,7 +1041,8 @@ void MainWindow::enableUI(bool state)
     ui->actionVolume_Serial->setEnabled(state);
     ui->actionAdd->setEnabled(state);
     ui->actionAttributes->setEnabled(state);
-    ui->actionAdd_Directories->setEnabled(state);   //TODO: Create "ArmUI" and "DisarmUI" functions with this stuff
+    ui->actionAdd_Directories->setEnabled(state);
+    ui->actionVolume->setEnabled(state);
 }
 
 
@@ -1059,4 +1061,14 @@ void MainWindow::on_twFileTree_customContextMenuRequested(const QPoint &pos)
     menu.addAction(ui->actionAttributes);
 
     menu.exec(ui->twFileTree->mapToGlobal(pos));
+}
+
+void MainWindow::on_actionVolume_triggered()
+{
+    bootSector(this,this->img,0,512).exec();
+
+    //refresh drive info
+    this->img->getContents("::/");
+    this->visualize();
+    this->visualizeModified();
 }

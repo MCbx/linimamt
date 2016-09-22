@@ -61,6 +61,8 @@ private slots:
 
     void on_twFileTree_customContextMenuRequested(const QPoint &pos);
 
+    void on_actionVolume_triggered();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;

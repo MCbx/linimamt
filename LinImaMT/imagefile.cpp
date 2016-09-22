@@ -69,6 +69,10 @@ bool ImageFile::getModified()
 {
     return this->modified;
 }
+QString ImageFile::getCurrentPath()
+{
+    return this->currentPath;
+}
 
 QString ImageFile::setLabel(QString label)
 {
@@ -76,7 +80,7 @@ QString ImageFile::setLabel(QString label)
     this->prepareForModify();
     this->modified=1;
     QString res;
-    int code=this->execute("mlabel","::\""+label.left(8)+"\"",res);
+    int code=this->execute("mlabel","::\""+label.left(11)+"\"",res);
     if (code!=0)
     {
         this->errorMessage("Error while setting label. Code: "+QString::number(code),res);
@@ -103,6 +107,11 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
             if (this->label.contains("has no label",Qt::CaseInsensitive))
             {
                 this->label="";
+            }
+            int abbrPos=this->label.indexOf(" (abbr=");
+            if (abbrPos>0)
+            {
+                this->label=this->label.left(abbrPos);
             }
             tmp=lines[1];
             this->serial=tmp.mid(tmp.indexOf("is")+3);
@@ -479,4 +488,9 @@ void ImageFile::setAttrbute(QString file, bool recursive, QString attribs)
 
     this->modified=1;
     return;
+}
+
+void ImageFile::forceModified(bool mod)
+{
+    this->modified=mod;
 }
