@@ -23,7 +23,6 @@
 //      TODO LIST      //
 // Drag-drop:
 //   - implementation of extracting
-// Boot sector preferences
 // revamp error dialog to use sessions
 // Command-line parameters
 // Mess with metadata!
