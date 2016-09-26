@@ -177,6 +177,7 @@
     </property>
     <addaction name="actionAddress_bar"/>
     <addaction name="actionVolume"/>
+    <addaction name="actionWipe_free_space"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -261,6 +262,9 @@
    </property>
   </action>
   <action name="actionGoUp">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/Resources/glyphs/up.png</normaloff>:/Resources/glyphs/up.png</iconset>
@@ -408,6 +412,14 @@
    </property>
    <property name="text">
     <string>Attributes...</string>
+   </property>
+  </action>
+  <action name="actionWipe_free_space">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Wipe free space...</string>
    </property>
   </action>
  </widget>

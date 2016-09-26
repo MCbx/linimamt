@@ -38,7 +38,7 @@ Most important things to do (except these in "MEMENTO" and "TODO" sections in so
  * Drag-drop should work better
  * Maybe messing with metadata
  * Hard disk image support, at least partial.
- * Image formats conversion, defragmenting, wiping free space
+ * Image formats conversion, defragmenting
  * More analysis functions could be nice, like running Testdisk on it to recover files
  * Refactoring code. This window class with everything thrown into it doesn't look good.
  * Do something with directory structure visualization code as it's quite bad now.

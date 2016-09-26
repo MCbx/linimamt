@@ -37,6 +37,7 @@ ImageFile::ImageFile(int imageSize, QString imageInit)
     return;
 }
 
+//Terminates the image removing its temp file
 void ImageFile::disposeFile()
 {
     if (this->tmpF!=NULL)
@@ -48,6 +49,10 @@ void ImageFile::disposeFile()
         }
     }
 }
+
+///////////////////////////
+/// GENERAL GET/SETTERS ///
+///////////////////////////
 
 int ImageFile::getFreeSpace()
 {
@@ -378,7 +383,7 @@ int ImageFile::errorMessage(QString text, QString console)
     return 0;
 }
 
-//this function prepares file for modification
+//this function prepares file for modification, it does NOT set modified flag yet.
 int ImageFile::prepareForModify()
 {
     if (this->currentPath!=this->originalPath)
@@ -490,6 +495,8 @@ void ImageFile::setAttrbute(QString file, bool recursive, QString attribs)
     return;
 }
 
+//Forces modification state. Use with care. Use only if the file has been prepared for modify
+//and the modification was performed outside of this class.
 void ImageFile::forceModified(bool mod)
 {
     this->modified=mod;

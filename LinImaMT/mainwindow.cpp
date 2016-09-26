@@ -26,7 +26,6 @@
 // revamp error dialog to use sessions
 // Command-line parameters
 // Mess with metadata!
-//Wipe free space
 
 //these need mounting to letters
 //Convert image between formats by mounting two images and moving files between
@@ -102,6 +101,11 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
+////////////////////////////
+///   GENERAL ROUTINES   ///
+////////////////////////////
+
 //shows asterisk if file is modified
 void MainWindow::visualizeModified()
 {
@@ -149,42 +153,6 @@ void MainWindow::visualizeModified()
     }
 }
 
-//edit label
-void MainWindow::on_label_edit()
-{
-    this->leLabel->setText(this->leLabel->text().trimmed());
-    if (this->img->getLabel()!=this->leLabel->text())
-    {
-        this->img->setLabel(this->leLabel->text());
-        visualizeModified();
-    }
-}
-
-//this thing sorts the doirectories always upwards.
-void MainWindow::customSortByColumn(int column)
-{
-    Qt::SortOrder order=ui->twFileTree->header()->sortIndicatorOrder();
-    ui->twFileTree->sortItems(column,order);
-
-    //take directories and push them to the beginning
-    for (int i=0;i<ui->twFileTree->topLevelItemCount();i++)
-    {
-        if (ui->twFileTree->topLevelItem(i)->text(2).at(0)=='D')
-        {
-            QTreeWidgetItem * item = ui->twFileTree->topLevelItem(i);
-            ui->twFileTree->takeTopLevelItem(i);
-            ui->twFileTree->insertTopLevelItem(0,item);
-        }
-    }
-
-}
-
-//on window close
-void MainWindow::on_actionExit_triggered()
-{
-    this->close();
-}
-
 //Display question about saving
 int MainWindow::askForSave()
 {
@@ -197,27 +165,6 @@ int MainWindow::askForSave()
     if (reply==QMessageBox::Cancel)
         return -1;
     return 2;
-}
-
-void MainWindow::closeEvent(QCloseEvent *clsEv)
-{
-    if ((this->img!=NULL)&&(this->img->getModified()))
-    {
-        int k=askForSave();
-        if (k==-1)
-        {
-            clsEv->ignore();
-            return;
-        }
-        if (k==1)
-        {
-            ui->actionSave->trigger();
-        }
-        clsEv->accept();
-    }
-    if (this->img) this->img->disposeFile();
-    this->saveSettings();
-    this->close();
 }
 
 //Load initial settings
@@ -288,57 +235,172 @@ void MainWindow::saveSettings()
 
 }
 
-void MainWindow::on_actionOpen_triggered()
+//makes number in decimal byte form e.g. 1 457 664 instead of 1457664
+QString decNumber(int source)
+{
+ QString a=QString::number(source);
+ QString b="";
+ for (int i=a.length()-1; i>=0; i--)
+ {
+     if (b.length()%4==0)
+         b=" "+b;
+     b=a.at(i)+b;
+
+ }
+ return b.trimmed();
+}
+
+//Displays normal designation on status bar
+//Normal designation shows items/selected items count, bytes and free space.
+//Contrary to "working designation" when computer is doing sth.
+void MainWindow::statusBarNormal()
+{
+   QString sb="";
+   unsigned int si=0;
+
+   //if items selected
+   if (ui->twFileTree->selectedItems().count()>0)
+   {
+        int i;
+        ui->actionRename->setEnabled(0);
+        ui->actionExtract_selected->setEnabled(1);
+        ui->actionDelete_selected->setEnabled(1);
+        ui->actionAttributes->setEnabled(1);
+        for (i=0;i<ui->twFileTree->selectedItems().count();i++)
+        { //the thing herer is to get number from "xx xxx" number string.
+            si+=ui->twFileTree->selectedItems().at(i)->text(1).replace(" ","").toInt();
+        }
+        sb+="Selected "+QString::number(i)+" item/s, occupying "+decNumber(si)+"B";
+   }
+   else
+   {
+       QTreeWidgetItemIterator it(ui->twFileTree);
+       while (*it)
+       {
+        si+=(*it)->text(1).replace(" ","").toInt();
+        ++it;
+       }
+       sb+=QString::number(ui->twFileTree->topLevelItemCount())+" item/s, occupying "+decNumber(si)+"B";
+   }
+   sb+=" ("+decNumber(this->img->getFreeSpace())+"B free)";
+
+   if (ui->twFileTree->selectedItems().count()==1)
+   {
+       ui->actionRename->setEnabled(1);
+       ui->actionAttributes->setEnabled(1);
+       ui->actionExtract_selected->setEnabled(1);
+   }
+   if (ui->twFileTree->selectedItems().count()==0)
+   {
+       ui->actionAttributes->setEnabled(0);
+       ui->actionRename->setEnabled(0);
+       ui->actionExtract_selected->setEnabled(0);
+       ui->actionDelete_selected->setEnabled(0);
+   }
+   ui->statusBar->showMessage(sb);
+}
+
+//on window close
+void MainWindow::on_actionExit_triggered()
+{
+    this->close();
+}
+
+void MainWindow::closeEvent(QCloseEvent *clsEv)
 {
     if ((this->img!=NULL)&&(this->img->getModified()))
     {
         int k=askForSave();
         if (k==-1)
         {
+            clsEv->ignore();
             return;
         }
         if (k==1)
         {
             ui->actionSave->trigger();
         }
+        clsEv->accept();
     }
-    QString fname = QFileDialog::getOpenFileName(this,"Open Image","","Disk Images (*.ima *.dsk *.img);;All files (*)");
-    if (fname!="")
-    {
-        ui->statusBar->showMessage("Loading file ...");
-        QApplication::processEvents();
-        this->loadFile(fname);
-        //we don't need to refresh status bar as it has been done with visualization
+    if (this->img) this->img->disposeFile();
+    this->saveSettings();
+    this->close();
+}
 
+//toggle address bar visibility
+void MainWindow::on_actionAddress_bar_triggered()
+{
+    if (ui->actionAddress_bar->isChecked())
+    {
+        ui->tbAddressBar->setVisible(1);
+    }
+    else
+    {
+        ui->tbAddressBar->setVisible(0);
     }
 }
 
-//load file
-int MainWindow::loadFile(QString fileName)
+//helper to estimate size of directory
+quint64 dir_size(const QString & str)
 {
-    this->enableUI(0);
-    this->currentFile=fileName;
-    //Mantle interface
-    if (this->img) this->img->disposeFile();
-    this->img = new ImageFile(fileName);
-    ui->twFileTree->setImageFile(this->img);
-    this->dirs=this->img->getContents("::/");
-    if ((this->img->getFreeSpace()==0)&&(this->img->getUsedSpace()==0)&&(this->img->getSerial()==""))
+    quint64 sizex = 0;
+    QFileInfo str_info(str);
+    if (str_info.isDir())
     {
-        ui->twFileTree->clear();
-        ui->twDirTree->clear();
-        this->leAddress->setText("::/");
-        this->leLabel->clear();
-        this->setWindowTitle("LinImaMT");
-        return 0;
+        QDir dir(str);
+        QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs |  QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+        for (int i = 0; i < list.size(); ++i)
+        {
+            QFileInfo fileInfo = list.at(i);
+            if(fileInfo.isDir())
+            {
+                    sizex += dir_size(fileInfo.absoluteFilePath());
+            }
+            else
+                sizex += fileInfo.size();
+
+        }
     }
-    //Visualize directories
-    this->visualize();
-    this->visualizeModified();
-    ui->twDirTree->setCurrentItem(ui->twDirTree->topLevelItem(0));  //select first item. Do not remove this.
-        ui->twFileTree->setDragDropMode(QTreeWidget::DragDrop);
-    this->enableUI(1);
-    return 0;
+    return sizex;
+}
+
+//enables/disables UI elements coordinated with image modification.
+void MainWindow::enableUI(bool state)
+{
+    this->leLabel->setEnabled(state);
+    ui->actionSave_As->setEnabled(state);
+    ui->actionCreate_Directory->setEnabled(state);
+    ui->actionVolume_Serial->setEnabled(state);
+    ui->actionAdd->setEnabled(state);
+    ui->actionAttributes->setEnabled(state);
+    ui->actionAdd_Directories->setEnabled(state);
+    ui->actionVolume->setEnabled(state);
+    ui->actionWipe_free_space->setEnabled(state);
+    ui->actionGoUp->setEnabled(state);
+}
+
+
+/////////////////////////////
+///   FILE AND DIR VIEW   ///
+/////////////////////////////
+
+//this thing sorts the doirectories always upwards.
+void MainWindow::customSortByColumn(int column)
+{
+    Qt::SortOrder order=ui->twFileTree->header()->sortIndicatorOrder();
+    ui->twFileTree->sortItems(column,order);
+
+    //take directories and push them to the beginning
+    for (int i=0;i<ui->twFileTree->topLevelItemCount();i++)
+    {
+        if (ui->twFileTree->topLevelItem(i)->text(2).at(0)=='D')
+        {
+            QTreeWidgetItem * item = ui->twFileTree->topLevelItem(i);
+            ui->twFileTree->takeTopLevelItem(i);
+            ui->twFileTree->insertTopLevelItem(0,item);
+        }
+    }
+
 }
 
 //visualize trees
@@ -428,22 +490,6 @@ void MainWindow::visualize()
     this->visualizeModified();
 }
 
-
-//makes number in decimal byte form
-QString decNumber(int source)
-{
- QString a=QString::number(source);
- QString b="";
- for (int i=a.length()-1; i>=0; i--)
- {
-     if (b.length()%4==0)
-         b=" "+b;
-     b=a.at(i)+b;
-
- }
- return b.trimmed();
-}
-
 //change directory
 void MainWindow::on_twDirTree_currentItemChanged(QTreeWidgetItem *current)
 {
@@ -528,6 +574,63 @@ void MainWindow::on_twFileTree_itemDoubleClicked(QTreeWidgetItem *item)
         //TODO: File double-click
 }
 
+//if we changed selection, refresh status bar.
+//This poses an intentional "breaker" for some processes.
+void MainWindow::on_twFileTree_itemSelectionChanged()
+{
+    this->statusBarNormal();
+}
+
+//this executes if valid content is dropped in valid place.
+void MainWindow::on_fileDragDrop(QString from, QString to)
+{
+   // QMessageBox::critical(this,"Drag",from+" into "+to);
+
+
+    //We have the following situations:
+    //1. Inside image - we move files
+    //2. anything outside image - we copy files.
+    //This is really bad, but Qt can't use ctrl, and we can't launch menu
+    //as its position is always screwed up only in KDE.
+
+    if ((from.startsWith("file://"))||(to.startsWith("file://")))
+    {
+        //copy
+        from=from.replace("file://","");
+        to=to.replace("file://","");
+        this->img->copyFile(from,to);
+    }
+    else
+    {
+        //move
+        this->img->moveFile(from,to);
+    }
+
+    //refresh
+    this->dirs=this->img->getContents("::/");
+    //Visualize directories
+    this->visualize();
+    this->statusBarNormal();
+    return;
+}
+
+//File listing context menu
+void MainWindow::on_twFileTree_customContextMenuRequested(const QPoint &pos)
+{
+    //Prepare context menu
+    QMenu menu(this);
+    menu.addAction(ui->actionExtract_selected);
+    menu.addAction(ui->actionAdd);
+    menu.addAction(ui->actionAdd_Directories);
+    menu.addSeparator();
+    menu.addAction(ui->actionCreate_Directory);
+    menu.addAction(ui->actionRename);
+    menu.addAction(ui->actionDelete_selected);
+    menu.addAction(ui->actionAttributes);
+
+    menu.exec(ui->twFileTree->mapToGlobal(pos));
+}
+
 //Up button
 void MainWindow::on_actionGoUp_triggered()
 {
@@ -538,78 +641,77 @@ void MainWindow::on_actionGoUp_triggered()
     ui->twDirTree->setCurrentItem(ui->twDirTree->currentItem()->parent());
 }
 
-//toggle address bar visibility
-void MainWindow::on_actionAddress_bar_triggered()
+
+/////////////////////////////
+///     IMAGE ACTIONS     ///
+/////////////////////////////
+
+//edit label
+void MainWindow::on_label_edit()
 {
-    if (ui->actionAddress_bar->isChecked())
+    this->leLabel->setText(this->leLabel->text().trimmed());
+    if (this->img->getLabel()!=this->leLabel->text())
     {
-        ui->tbAddressBar->setVisible(1);
-    }
-    else
-    {
-        ui->tbAddressBar->setVisible(0);
+        this->img->setLabel(this->leLabel->text());
+        visualizeModified();
     }
 }
 
-//Displays normal designation on status bar
-//Normal designation shows items/selected items count, bytes and free space.
-//Contrary to "working designation" when computer is doing sth.
-void MainWindow::statusBarNormal()
+//open file action
+void MainWindow::on_actionOpen_triggered()
 {
-   QString sb="";
-   unsigned int si=0;
-
-   //if items selected
-   if (ui->twFileTree->selectedItems().count()>0)
-   {
-        int i;
-        ui->actionRename->setEnabled(0);
-        ui->actionExtract_selected->setEnabled(1);
-        ui->actionDelete_selected->setEnabled(1);
-        ui->actionAttributes->setEnabled(1);
-        for (i=0;i<ui->twFileTree->selectedItems().count();i++)
-        { //the thing herer is to get number from "xx xxx" number string.
-            si+=ui->twFileTree->selectedItems().at(i)->text(1).replace(" ","").toInt();
+    if ((this->img!=NULL)&&(this->img->getModified()))
+    {
+        int k=askForSave();
+        if (k==-1)
+        {
+            return;
         }
-        sb+="Selected "+QString::number(i)+" item/s, occupying "+decNumber(si)+"B";
-   }
-   else
-   {
-       QTreeWidgetItemIterator it(ui->twFileTree);
-       while (*it)
-       {
-        si+=(*it)->text(1).replace(" ","").toInt();
-        ++it;
-       }
-       sb+=QString::number(ui->twFileTree->topLevelItemCount())+" item/s, occupying "+decNumber(si)+"B";
-   }
-   sb+=" ("+decNumber(this->img->getFreeSpace())+"B free)";
+        if (k==1)
+        {
+            ui->actionSave->trigger();
+        }
+    }
+    QString fname = QFileDialog::getOpenFileName(this,"Open Image","","Disk Images (*.ima *.dsk *.img);;All files (*)");
+    if (fname!="")
+    {
+        ui->statusBar->showMessage("Loading file ...");
+        QApplication::processEvents();
+        this->loadFile(fname);
+        //we don't need to refresh status bar as it has been done with visualization
 
-   if (ui->twFileTree->selectedItems().count()==1)
-   {
-       ui->actionRename->setEnabled(1);
-       ui->actionAttributes->setEnabled(1);
-       ui->actionExtract_selected->setEnabled(1);
-   }
-   if (ui->twFileTree->selectedItems().count()==0)
-   {
-       ui->actionAttributes->setEnabled(0);
-       ui->actionRename->setEnabled(0);
-       ui->actionExtract_selected->setEnabled(0);
-       ui->actionDelete_selected->setEnabled(0);
-   }
-   ui->statusBar->showMessage(sb);
+    }
 }
 
-//if we changed selection, refresh status bar.
-//This poses an intentional "breaker" for some processes.
-void MainWindow::on_twFileTree_itemSelectionChanged()
+//load file procedure
+int MainWindow::loadFile(QString fileName)
 {
-    this->statusBarNormal();
+    this->enableUI(0);
+    this->currentFile=fileName;
+    //Mantle interface
+    if (this->img) this->img->disposeFile();
+    this->img = new ImageFile(fileName);
+    ui->twFileTree->setImageFile(this->img);
+    this->dirs=this->img->getContents("::/");
+    if ((this->img->getFreeSpace()==0)&&(this->img->getUsedSpace()==0)&&(this->img->getSerial()==""))
+    {
+        ui->twFileTree->clear();
+        ui->twDirTree->clear();
+        this->leAddress->setText("::/");
+        this->leLabel->clear();
+        this->setWindowTitle("LinImaMT");
+        return 0;
+    }
+    //Visualize directories
+    this->visualize();
+    this->visualizeModified();
+    ui->twDirTree->setCurrentItem(ui->twDirTree->topLevelItem(0));  //select first item. Do not remove this.
+        ui->twFileTree->setDragDropMode(QTreeWidget::DragDrop);
+    this->enableUI(1);
+    return 0;
 }
 
-//Save file "as" is always accessible. Then the working file
-//is changed to saved file.
+//Save file "as" is always accessible. Then the working file is changed to saved file.
 void MainWindow::on_actionSave_As_triggered()
 {
     QString fname = QFileDialog::getSaveFileName(this,"Save Image as","","Disk Images (*.ima *.dsk *.img);;All files (*)");
@@ -799,39 +901,6 @@ void MainWindow::on_actionDelete_selected_triggered()
 
 }
 
-//this executes if valid content is dropped in valid place.
-void MainWindow::on_fileDragDrop(QString from, QString to)
-{
-   // QMessageBox::critical(this,"Drag",from+" into "+to);
-
-
-    //We have the following situations:
-    //1. Inside image - we move files
-    //2. anything outside image - we copy files.
-    //This is really bad, but Qt can't use ctrl, and we can't launch menu
-    //as its position is always screwed up only in KDE.
-
-    if ((from.startsWith("file://"))||(to.startsWith("file://")))
-    {
-        //copy
-        from=from.replace("file://","");
-        to=to.replace("file://","");
-        this->img->copyFile(from,to);
-    }
-    else
-    {
-        //move
-        this->img->moveFile(from,to);
-    }
-
-    //refresh
-    this->dirs=this->img->getContents("::/");
-    //Visualize directories
-    this->visualize();
-    this->statusBarNormal();
-    return;
-}
-
 //Copy files from filesystem into image. This must be split between dir/file
 //as Qt doesn't support selecting Files/dirs in one window (June 2016).
 void MainWindow::on_actionAdd_triggered()
@@ -878,30 +947,6 @@ void MainWindow::on_actionAdd_triggered()
     return;
 }
 
-//helper to estimate size of directory
-quint64 dir_size(const QString & str)
-{
-    quint64 sizex = 0;
-    QFileInfo str_info(str);
-    if (str_info.isDir())
-    {
-        QDir dir(str);
-        QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs |  QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
-        for (int i = 0; i < list.size(); ++i)
-        {
-            QFileInfo fileInfo = list.at(i);
-            if(fileInfo.isDir())
-            {
-                    sizex += dir_size(fileInfo.absoluteFilePath());
-            }
-            else
-                sizex += fileInfo.size();
-
-        }
-    }
-    return sizex;
-}
-
 //Add directory. This must be split between dir/file
 //as Qt doesn't support selecting Files/dirs in one window (June 2016).
 void MainWindow::on_actionAdd_Directories_triggered()
@@ -944,6 +989,7 @@ void MainWindow::on_actionAdd_Directories_triggered()
     return;
 }
 
+//Edit attributes of selected items
 void MainWindow::on_actionAttributes_triggered()
 {
     QList<QString> attributes;
@@ -983,6 +1029,7 @@ void MainWindow::on_actionAttributes_triggered()
     return;
 }
 
+//New image
 void MainWindow::on_actionNew_triggered()
 {
     if ((this->img!=NULL)&&(this->img->getModified()))
@@ -1031,44 +1078,56 @@ void MainWindow::on_actionNew_triggered()
     return;
 }
 
-//enables/disables UI elements coordinated with image modification.
-void MainWindow::enableUI(bool state)
-{
-    this->leLabel->setEnabled(state);
-    ui->actionSave_As->setEnabled(state);
-    ui->actionCreate_Directory->setEnabled(state);
-    ui->actionVolume_Serial->setEnabled(state);
-    ui->actionAdd->setEnabled(state);
-    ui->actionAttributes->setEnabled(state);
-    ui->actionAdd_Directories->setEnabled(state);
-    ui->actionVolume->setEnabled(state);
-}
-
-
-//File listing context menu
-void MainWindow::on_twFileTree_customContextMenuRequested(const QPoint &pos)
-{
-    //Prepare context menu
-    QMenu menu(this);
-    menu.addAction(ui->actionExtract_selected);
-    menu.addAction(ui->actionAdd);
-    menu.addAction(ui->actionAdd_Directories);
-    menu.addSeparator();
-    menu.addAction(ui->actionCreate_Directory);
-    menu.addAction(ui->actionRename);
-    menu.addAction(ui->actionDelete_selected);
-    menu.addAction(ui->actionAttributes);
-
-    menu.exec(ui->twFileTree->mapToGlobal(pos));
-}
-
 //Boot sector properties window
 void MainWindow::on_actionVolume_triggered()
 {
     bootSector(this,this->img,0,512).exec();
 
     //refresh drive info
-    this->img->getContents("::/");
+    this->dirs=this->img->getContents("::/");
+    this->visualize();
+    this->visualizeModified();
+}
+
+//wipe free space
+void MainWindow::on_actionWipe_free_space_triggered()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Wipe free space",
+                                  "This will remove all garbage data from free space, making image compress better.\n"
+                                  "On the other side, you will loose ability to undelete.\n"
+                                  "In some original software disks this may damage the program (copy protection data).\n"
+                                  "Do you want to continue?",
+                                  QMessageBox::Yes|QMessageBox::No);
+    if (reply==QMessageBox::No)
+        return;
+
+    //1. Get free space from image
+    uint freeSpace=this->img->getFreeSpace();
+
+    //2. Prepare a zero-filled temp file with free space
+    ui->statusBar->showMessage("Generating zero-file...");
+    QApplication::processEvents();
+    QTemporaryFile tmpF(QDir::temp().absoluteFilePath("$XXXXXXX.bin"));
+    //2. copy source image to temporary file
+    //this->tmpF->open();
+    tmpF.open();
+    tmpF.write(QByteArray(freeSpace,0));
+    tmpF.close();
+
+    //3. Copy the file to image
+    ui->statusBar->showMessage("Copying to image...");
+    QApplication::processEvents();
+    this->img->copyFile(tmpF.fileName(),"::/$$$wipe.bin");
+
+    //4. Remove the file from image
+    ui->statusBar->showMessage("Removing from image...");
+    QApplication::processEvents();
+    this->img->deleteFile("::/$$$wipe.bin");
+
+    tmpF.remove();
+
+    this->dirs=this->img->getContents("::/"); //update structure too to notify about possible failure of file deletion
     this->visualize();
     this->visualizeModified();
 }

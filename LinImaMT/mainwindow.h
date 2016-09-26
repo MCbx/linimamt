@@ -63,6 +63,8 @@ private slots:
 
     void on_actionVolume_triggered();
 
+    void on_actionWipe_free_space_triggered();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;
