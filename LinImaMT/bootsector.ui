@@ -236,7 +236,7 @@
     <string>Use to preserve disk geometry and root directory information when substituting boot block from drive with other geometry</string>
    </property>
    <property name="text">
-    <string>Preserve a whole BIOS area when loading, saving 0x0B until</string>
+    <string>Preserve a whole BIOS block when loading, saving 0x0B until</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="leBIOSEnds">

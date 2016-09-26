@@ -138,6 +138,7 @@ void bootSector::on_pushButton_clicked()
     }
 
     int getBlock=ui->leBIOSEnds->text().toUpper().toInt(NULL,16);
+    //char blockSize=this->sectorData.at(1)-2; //size of BIOS parameter block
     QByteArray BIOSBlock;
     //check if user entered proper value
     if (ui->cbPreserveBIOS->isChecked())
@@ -152,6 +153,20 @@ void bootSector::on_pushButton_clicked()
 
     //load the dump
     this->modified=1;
+    file.seek(1);
+    char newBPBSize=0;
+    file.read(&newBPBSize,1);
+
+    if ((newBPBSize!=getBlock-2)&&(ui->cbPreserveBIOS->isChecked()))
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Wrong size",
+                                      "In loaded sector, BIOS block has length 0x"+QString::number((unsigned char)newBPBSize,16).toUpper()+
+                                      "\nAnd the image or setting is 0x"+QString::number(getBlock-2,16).toUpper()+"\n This will likely fail. Do you want to continue?",
+                                      QMessageBox::Yes|QMessageBox::No);
+        if (reply==QMessageBox::No)
+            return;
+    }
     file.seek(0); //After calling size() - Qt4 bug on BSD.
     this->sectorData=file.readAll();
     file.close();

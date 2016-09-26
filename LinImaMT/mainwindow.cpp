@@ -1062,6 +1062,7 @@ void MainWindow::on_twFileTree_customContextMenuRequested(const QPoint &pos)
     menu.exec(ui->twFileTree->mapToGlobal(pos));
 }
 
+//Boot sector properties window
 void MainWindow::on_actionVolume_triggered()
 {
     bootSector(this,this->img,0,512).exec();
