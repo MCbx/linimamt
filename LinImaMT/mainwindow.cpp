@@ -42,6 +42,10 @@
 // will give hd listing.
 // Make unique config file name as user may launch many instances.
 
+//Because of a bug/feature in MTools, the drive letter can be 1: 2: etc., what allows us
+//to bypass Windows drive letters. This way we can use multi-image approach to copy files
+//without touching the hard disk buffer: mcopy -p -m 2:/command.com 3:/
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
