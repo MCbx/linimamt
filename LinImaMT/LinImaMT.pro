@@ -41,4 +41,5 @@ RESOURCES += \
     resources.qrc
 
 DISTFILES += \
-    ../README.md
+    ../README.md \
+    ../sshot.png
