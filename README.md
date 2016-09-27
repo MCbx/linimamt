@@ -1,5 +1,8 @@
 LinIMAmt
 ========
+
+![Screenshot](https://raw.githubusercontent.com/MCbx/linimamt/master/sshot.png)
+
 This is a quick-and-dirty GUI for GNU Mtools made in Qt. It is dedicated to opening, browsing, extracting and composing 
 floppy disk image files. It is a project under slow development, and the simple functionality has been achieved allowing
 to work with disk images. When it will be done, it will be shared with other programs.
