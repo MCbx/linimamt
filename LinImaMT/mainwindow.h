@@ -15,54 +15,33 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QStringList arguments, QWidget *parent = 0);
     ~MainWindow();
 
 private slots:
     void on_actionExit_triggered();
-
     void on_actionOpen_triggered();
-
     void on_twDirTree_currentItemChanged(QTreeWidgetItem *current);
-
     void customSortByColumn(int column);
-
     void on_twFileTree_itemDoubleClicked(QTreeWidgetItem *item);
-
     void on_actionGoUp_triggered();
-
     void on_actionAddress_bar_triggered();
     void on_label_edit();
-
     void on_twFileTree_itemSelectionChanged();
-
     void on_actionSave_As_triggered();
-
     void on_actionSave_triggered();
-
     void on_actionRename_triggered();
-
     void on_actionCreate_Directory_triggered();
-
     void on_actionVolume_Serial_triggered();
-
     void on_actionExtract_selected_triggered();
-
     void on_actionDelete_selected_triggered();
-
     void on_actionAdd_triggered();
-
     void on_actionAdd_Directories_triggered();
-
     void on_fileDragDrop(QString from, QString to);
     void on_actionAttributes_triggered();
-
     void on_actionNew_triggered();
-
     void on_twFileTree_customContextMenuRequested(const QPoint &pos);
-
     void on_actionVolume_triggered();
-
     void on_actionWipe_free_space_triggered();
 
 private:

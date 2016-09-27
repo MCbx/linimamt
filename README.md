@@ -1,8 +1,8 @@
 LinIMAmt
 ========
 This is a quick-and-dirty GUI for GNU Mtools made in Qt. It is dedicated to opening, browsing, extracting and composing 
-floppy disk image files. It is a project under slow development, and **most functions I want are not done yet**, however
-the simple functionality has been achieved. When it will be done, it will be shared with other programs.
+floppy disk image files. It is a project under slow development, and the simple functionality has been achieved allowing
+to work with disk images. When it will be done, it will be shared with other programs.
 
 The program is made the way that people using Windows disk imaging software (e.g. WinImage) should be familiar with
 the UI and the main goal is to make Windows users who switched to Linux manage disk images for their old PCs.
@@ -34,7 +34,7 @@ Which means: Now working, and probably has to be fixed on some edge cases:
 
 Todo
 =========
-Most important things to do (except these in "MEMENTO" and "TODO" sections in source code):
+Most important things to do:
  * Drag-drop should work better
  * Maybe messing with metadata
  * Hard disk image support, at least partial.

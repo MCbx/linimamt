@@ -24,7 +24,6 @@
 // Drag-drop:
 //   - implementation of extracting
 // revamp error dialog to use sessions
-// Command-line parameters
 // Mess with metadata!
 
 //these need mounting to letters
@@ -46,7 +45,7 @@
 //to bypass Windows drive letters. This way we can use multi-image approach to copy files
 //without touching the hard disk buffer: mcopy -p -m 2:/command.com 3:/
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
@@ -64,7 +63,6 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->mainToolBar->setEnabled(0);
     }
 
-    //PARSE PARAMETERS!!
 
     //MANTLE UI
     ui->twFileTree->headerItem()->setText(0,"Name");
@@ -91,11 +89,32 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->twDirTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-    //READ SETTINGS!
+    //READ SETTINGS
     this->loadSettings();
 
     this->img=NULL;
     ui->twFileTree->setDragDropMode(QTreeWidget::NoDragDrop);
+
+
+    //PARSE PARAMETERS
+    if (arguments.count()>=2)
+    {
+        if (arguments[1]=="-new")
+        {
+            this->on_actionNew_triggered();
+        }
+
+        if (QFile::exists(arguments[1]))
+        {
+            ui->statusBar->showMessage("Loading file ...");
+            QApplication::processEvents();
+            this->loadFile(arguments[1]);
+        } else
+        {
+            QMessageBox::information(0,"Problem","Parameter unknown and file does not exist: "+arguments[1]);
+        }
+    }
+
     //START application
 }
 
