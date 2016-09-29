@@ -179,6 +179,7 @@
     <addaction name="actionAddress_bar"/>
     <addaction name="actionVolume"/>
     <addaction name="actionWipe_free_space"/>
+    <addaction name="actionRun_TestDisk_on_image"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -429,6 +430,17 @@
   <action name="actionOpen_as_Read_only">
    <property name="text">
     <string>Open as Read-only</string>
+   </property>
+  </action>
+  <action name="actionRun_TestDisk_on_image">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Run TestDisk on image...</string>
+   </property>
+   <property name="toolTip">
+    <string>Run TestDisk on image to e.g. recover deleted files.</string>
    </property>
   </action>
  </widget>

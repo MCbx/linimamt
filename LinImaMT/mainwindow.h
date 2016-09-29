@@ -46,6 +46,8 @@ private slots:
 
     void on_actionOpen_as_Read_only_triggered();
 
+    void on_actionRun_TestDisk_on_image_triggered();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;

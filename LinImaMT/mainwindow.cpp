@@ -29,26 +29,26 @@
 //these need mounting to letters
 //Convert image between formats by mounting two images and moving files between
 // - derivative - defrag image - by converting format on itself
-//Open hard disk images - partition mounting
+//Open hard disk images - partition choosing ImageFile can now use offset as parameter without files thanks to @@ operator.
 
-//to open hard disk image:
+//to open many images at once:
 // - configuration file:
-// drive c: file="/path/to/file.img" partition=1
-// or partition=2,3,4.
-// Only primary partitions are supported.
+// drive 1: file="/path/to/file.img" offset=...
+// drive 2: file="/path/to/file2.img" offset=...
+// or other offsets.
+// partition is for primary ones. offset allows to read logical drives.
 // Config file should be pointed by $MTOOLSRC variable.
-// e.g. execute this: env MTOOLSRC="/tmp/mtoolsrc" mdir c:/
+// e.g. execute this: env MTOOLSRC="/tmp/mtoolsrc" mdir 1:/
 // will give hd listing.
 // Make unique config file name as user may launch many instances.
-
 //Because of a bug/feature in MTools, the drive letter can be 1: 2: etc., what allows us
 //to bypass Windows drive letters. This way we can use multi-image approach to copy files
 //without touching the hard disk buffer: mcopy -p -m 2:/command.com 3:/
 
 //This would require direct mode as copying large files to temp dir is NOT a solution.
 //direct mode should be enabled/disabled by default on opening
-//there also shiould be size threshold. All >=4MB open as disk, select partition,
-// +checkbox for direct/non-direct mode
+//there also shiould be size threshold. All >3MB open as disk, select partition,
+// +choose to open direct mode, read only, conventional mode.
 
 MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     QMainWindow(parent),
@@ -57,6 +57,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     ui->setupUi(this);
     connect(ui->twFileTree,SIGNAL(sigDragDrop(QString,QString)),this,SLOT(on_fileDragDrop(QString,QString)));
     connect(ui->twDirTree,SIGNAL(sigDragDrop(QString,QString)),this,SLOT(on_fileDragDrop(QString,QString)));
+
     //VERIFY EXISTENCE OF MTOOLS!
     this->process=new QProcess(this);   //TO BE PORTED win
     this->process->start("which mtools");
@@ -64,6 +65,17 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     if (this->process->exitCode()!=0)
     {
         QMessageBox::critical(this,"Cannot continue","mtools cannot be found");
+        ui->menuBar->setEnabled(0);
+        ui->mainToolBar->setEnabled(0);
+    }
+
+    //VERIFY EXISTENCE OF TESTDISK
+    this->process=new QProcess(this);   //TO BE PORTED win
+    this->process->start("which testdisk");
+    this->process->waitForFinished();
+    if (this->process->exitCode()!=0)
+    {
+        QMessageBox::critical(this,"Cannot continue","testdisk cannot be found");
         ui->menuBar->setEnabled(0);
         ui->mainToolBar->setEnabled(0);
     }
@@ -442,6 +454,7 @@ void MainWindow::enableUI(bool state)
     ui->actionGoUp->setEnabled(state);
     ui->twDirTree->setAcceptDrops(state);
     ui->twFileTree->setAcceptDrops(state);
+    ui->actionRun_TestDisk_on_image->setEnabled(state);
 
     if (this->img==NULL)
         return;
@@ -1243,3 +1256,19 @@ void MainWindow::on_actionWipe_free_space_triggered()
     this->visualizeModified();
 }
 
+
+void MainWindow::on_actionRun_TestDisk_on_image_triggered()
+{
+    QFileDialog fileDlg(this,"Speciwy working directory foe recovered files","","All files (*)");
+    fileDlg.setFileMode(QFileDialog::Directory);
+    fileDlg.setOption(QFileDialog::ShowDirsOnly);
+    if (!fileDlg.exec())
+        return;
+
+    QString testDiskPath = "xterm"; //TO BE PORTED win like cmd /k "/path/to/testdisk.exe" param
+    QStringList par;
+    par.append("-e");
+    par.append("testdisk \""+this->img->getCurrentPath()+"\"");
+
+    QProcess::startDetached(testDiskPath,par,fileDlg.selectedFiles()[0]);
+}

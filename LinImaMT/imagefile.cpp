@@ -5,13 +5,14 @@
 #include <QDir>
 
 //open image
-ImageFile::ImageFile(QString imagePath, HandleMode a)
+ImageFile::ImageFile(QString imagePath, HandleMode a, qint64 offset)
 {
     this->tmpF=NULL;
     this->currentPath=imagePath;
     this->originalPath=imagePath;
     this->modified=0;
     this->operationMode=a;
+    this->offset=offset;
 }
 
 //create new
@@ -96,7 +97,12 @@ int ImageFile::execute(QString command, QString parameters, QString &result)    
 {
     QProcess executing;
     executing.setProcessChannelMode(QProcess::MergedChannels);
-    executing.start("mtools -c "+command+" -i \""+this->currentPath+"\" "+parameters);
+    QString partOffset="";
+    if (this->offset>-1)
+    {
+        partOffset="@@"+QString::number(this->offset);
+    }
+    executing.start("mtools -c "+command+" -i \""+this->currentPath+"\""+partOffset+" "+parameters);
     executing.waitForFinished();
 
     QString op(executing.readAllStandardOutput());
