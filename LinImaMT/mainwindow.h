@@ -20,7 +20,7 @@ public:
 
 private slots:
     void on_actionExit_triggered();
-    void on_actionOpen_triggered();
+    void on_actionOpen_triggered(ImageFile::HandleMode mode=ImageFile::DefaultMode);
     void on_twDirTree_currentItemChanged(QTreeWidgetItem *current);
     void customSortByColumn(int column);
     void on_twFileTree_itemDoubleClicked(QTreeWidgetItem *item);
@@ -44,6 +44,8 @@ private slots:
     void on_actionVolume_triggered();
     void on_actionWipe_free_space_triggered();
 
+    void on_actionOpen_as_Read_only_triggered();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;
@@ -56,7 +58,7 @@ private:
     //functions
     void closeEvent(QCloseEvent *clsEv);
     int execute(QString command, QString parameters, QString & result);
-    int loadFile(QString fileName);
+    int loadFile(QString fileName, ImageFile::HandleMode mode = ImageFile::DefaultMode);
     int prepareDirDump(QString home);
     int errorMessage(QString text, QString console);
     void visualize();

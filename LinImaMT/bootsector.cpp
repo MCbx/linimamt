@@ -10,7 +10,7 @@
 //It allows to dump these 512 bytes into file or read another 512 bytes from file
 //and apply it to the image.
 
-bootSector::bootSector(QWidget *parent, ImageFile * image, int offset, int length) :
+bootSector::bootSector(QWidget *parent, ImageFile * image, int offset, int length, bool ReadOnly) :
     QDialog(parent),
     ui(new Ui::bootSector)
 {    
@@ -36,6 +36,10 @@ bootSector::bootSector(QWidget *parent, ImageFile * image, int offset, int lengt
     ui->leSerial->setInputMask("HH HH HH HH");
     ui->leBIOSEnds->setInputMask("HH");
 
+    if (ReadOnly==1)
+    {
+        ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
+    }
     this->refreshView();
 }
 

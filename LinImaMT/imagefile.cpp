@@ -4,15 +4,18 @@
 #include <QTemporaryFile>
 #include <QDir>
 
-ImageFile::ImageFile(QString imagePath)
+//open image
+ImageFile::ImageFile(QString imagePath, HandleMode a)
 {
     this->tmpF=NULL;
     this->currentPath=imagePath;
     this->originalPath=imagePath;
     this->modified=0;
+    this->operationMode=a;
 }
 
-ImageFile::ImageFile(int imageSize, QString imageInit)
+//create new
+ImageFile::ImageFile(int imageSize, QString imageInit, HandleMode a)
 {
     this->modified=0;
     if (imageSize<0)
@@ -33,6 +36,7 @@ ImageFile::ImageFile(int imageSize, QString imageInit)
         errorMessage("Failed to format the image. Code "+QString::number(status),op);
         return;
     }
+    this->operationMode=a;
     this->modified=1;
     return;
 }
@@ -79,19 +83,128 @@ QString ImageFile::getCurrentPath()
     return this->currentPath;
 }
 
-QString ImageFile::setLabel(QString label)
+ImageFile::HandleMode ImageFile::getHandleMode()
 {
-
-    this->prepareForModify();
-    this->modified=1;
-    QString res;
-    int code=this->execute("mlabel","::\""+label.left(11)+"\"",res);
-    if (code!=0)
-    {
-        this->errorMessage("Error while setting label. Code: "+QString::number(code),res);
-    }
-    return "";
+    return this->operationMode;
 }
+
+//////////////////////////////
+/// IMAGE FILE MAINTENANCE ///
+//////////////////////////////
+
+//execute mtools with specific command on currently loaded image.
+int ImageFile::execute(QString command, QString parameters, QString &result)       //TO BE PORTED
+{
+    QProcess executing;
+    executing.setProcessChannelMode(QProcess::MergedChannels);
+    executing.start("mtools -c "+command+" -i \""+this->currentPath+"\" "+parameters);
+    executing.waitForFinished();
+
+    QString op(executing.readAllStandardOutput());
+   // op=op+"\n\n\n\n"+executing.readAllStandardError();
+    result=op;
+    result=result+"\n\nWhile: "+"mtools -c "+command+" -i \""+this->currentPath+"\" "+parameters;
+    return executing.exitCode();
+}
+
+//throw a nice, GUI-based error message with a console
+int ImageFile::errorMessage(QString text, QString console)
+{
+    ErrorDialog * a = new ErrorDialog(NULL,text,console);
+    a->show();
+    return 0;
+}
+
+//this function prepares file for modification, it does NOT set modified flag yet.
+int ImageFile::prepareForModify()
+{
+    if (this->operationMode==ImageFile::ReadOnly)
+        return -2; // file is read only. This should never happen
+    if (this->operationMode==ImageFile::DirectMode)
+        return 0;  //file is directly modified on disk
+
+    if (this->currentPath!=this->originalPath)
+    {
+        return -1;  //already put into modification
+    }
+    //1. create temporary file
+    this->tmpF = new QTemporaryFile(QDir::temp().absoluteFilePath("imaXXXXXXXX.img"));
+    //2. copy source image to temporary file
+    this->tmpF->open();
+    this->tmpF->close();
+    QFile destination(this->tmpF->fileName());
+    QFile source(this->currentPath);
+    source.open(QIODevice::ReadOnly);
+    destination.open(QIODevice::ReadWrite);
+    QByteArray buffer;
+    int chunksize = 256;
+    while(!(buffer = source.read(chunksize)).isEmpty()){
+        destination.write(buffer);
+    }
+    tmpF->close();
+    source.close();
+    destination.close();
+    //3. change current path to temporary file
+    this->currentPath=this->tmpF->fileName();
+    //this->modified=1;
+    return 0;
+}
+
+int ImageFile::saveFile(QString fileName)
+{
+    //if fileName="", then save to originalPath
+    if (fileName=="")
+    {
+        if (!this->modified)
+            return 2;
+        QFile source(this->currentPath);
+        QFile destination(this->originalPath);
+        source.open(QIODevice::ReadOnly);
+        destination.open(QIODevice::ReadWrite);
+        QByteArray buffer;
+        int chunksize = 256;
+        while(!(buffer = source.read(chunksize)).isEmpty()){
+            destination.write(buffer);
+        }
+        source.close();
+        destination.close();
+        this->modified=0;
+        return 0;
+    }
+    else    //save as
+    {
+        QFile source(this->currentPath);
+        QFile destination(fileName);
+        source.open(QIODevice::ReadOnly);
+        destination.open(QIODevice::ReadWrite);
+        QByteArray buffer;
+        int chunksize = 256;
+        while(!(buffer = source.read(chunksize)).isEmpty()){
+            destination.write(buffer);
+        }
+        source.close();
+        destination.close();
+        this->modified=0;
+        this->currentPath=fileName;
+        this->originalPath=fileName;
+        return 0;
+    }
+    //if name is specified, just copy the file.
+}
+
+//Forces modification state. Use with care. Use only if the file has been prepared for modify
+//and the modification was performed outside of this class.
+void ImageFile::forceModified(bool mod)
+{
+    if (this->operationMode==ImageFile::ReadOnly)
+        return;
+
+    this->modified=mod;
+}
+
+///////////////////////////
+///    IMAGE EDITING    ///
+///////////////////////////
 
 QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
 {
@@ -269,8 +382,25 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
         return dirs;
 }
 
+QString ImageFile::setLabel(QString label)
+{
+    if (this->operationMode==ImageFile::ReadOnly)
+        return "";
+    this->prepareForModify();
+    this->modified=1;
+    QString res;
+    int code=this->execute("mlabel","::\""+label.left(11)+"\"",res);
+    if (code!=0)
+    {
+        this->errorMessage("Error while setting label. Code: "+QString::number(code),res);
+    }
+    return "";
+}
+
 int ImageFile::moveFile(QString source, QString destination)
 {
+    if (this->operationMode==ImageFile::ReadOnly)
+        return -1;
     this->prepareForModify();
     QString op;
     if ((destination.contains("\\..\\"))||(destination.contains("/../")))
@@ -290,6 +420,8 @@ int ImageFile::moveFile(QString source, QString destination)
 
 int ImageFile::copyFile(QString source, QString destination)
 {
+    if (this->operationMode==ImageFile::ReadOnly)
+        return -1;
     this->prepareForModify();
     QString op;
     if ((destination.contains("\\..\\"))||(destination.contains("/../")))
@@ -309,6 +441,8 @@ int ImageFile::copyFile(QString source, QString destination)
 
 int ImageFile::makeFolder(QString path)
 {
+    if (this->operationMode==ImageFile::ReadOnly)
+        return -1;
     this->prepareForModify();
     QString op;
     if ((path.contains("\\..\\"))||(path.contains("/../")))
@@ -328,6 +462,8 @@ int ImageFile::makeFolder(QString path)
 
 int ImageFile::deleteFile(QString source)
 {
+    if (this->operationMode==ImageFile::ReadOnly)
+        return -1;
     this->prepareForModify();
     QString op="";
     if ((source.contains("\\..\\"))||(source.contains("/../")))
@@ -347,6 +483,8 @@ int ImageFile::deleteFile(QString source)
 
 void ImageFile::setSerial(QString serial)
 {
+    if (this->operationMode==ImageFile::ReadOnly)
+        return;
     this->prepareForModify();
     QString op;
     int status=this->execute("mlabel","::\""+this->label+"\" -N "+serial,op);
@@ -360,103 +498,10 @@ void ImageFile::setSerial(QString serial)
     return;
 }
 
-//execute mtools with specific command on currently loaded image.
-int ImageFile::execute(QString command, QString parameters, QString &result)       //TO BE PORTED
-{
-    QProcess executing;
-    executing.setProcessChannelMode(QProcess::MergedChannels);
-    executing.start("mtools -c "+command+" -i \""+this->currentPath+"\" "+parameters);
-    executing.waitForFinished();
-
-    QString op(executing.readAllStandardOutput());
-   // op=op+"\n\n\n\n"+executing.readAllStandardError();
-    result=op;
-    result=result+"\n\nWhile: "+"mtools -c "+command+" -i \""+this->currentPath+"\" "+parameters;
-    return executing.exitCode();
-}
-
-//throw a nice, GUI-based error message with a console
-int ImageFile::errorMessage(QString text, QString console)
-{
-    ErrorDialog * a = new ErrorDialog(NULL,text,console);
-    a->show();
-    return 0;
-}
-
-//this function prepares file for modification, it does NOT set modified flag yet.
-int ImageFile::prepareForModify()
-{
-    if (this->currentPath!=this->originalPath)
-    {
-        return -1;  //already put into modification
-    }
-    //1. create temporary file
-    this->tmpF = new QTemporaryFile(QDir::temp().absoluteFilePath("imaXXXXXXXX.img"));
-    //2. copy source image to temporary file
-    this->tmpF->open();
-    this->tmpF->close();
-    QFile destination(this->tmpF->fileName());
-    QFile source(this->currentPath);
-    source.open(QIODevice::ReadOnly);
-    destination.open(QIODevice::ReadWrite);
-    QByteArray buffer;
-    int chunksize = 256;
-    while(!(buffer = source.read(chunksize)).isEmpty()){
-        destination.write(buffer);
-    }
-    tmpF->close();
-    source.close();
-    destination.close();
-    //3. change current path to temporary file
-    this->currentPath=this->tmpF->fileName();
-    //this->modified=1;
-    return 0;
-}
-
-int ImageFile::saveFile(QString fileName)
-{
-    //if fileName="", then save to originalPath
-    if (fileName=="")
-    {
-        if (!this->modified)
-            return 2;
-        QFile source(this->currentPath);
-        QFile destination(this->originalPath);
-        source.open(QIODevice::ReadOnly);
-        destination.open(QIODevice::ReadWrite);
-        QByteArray buffer;
-        int chunksize = 256;
-        while(!(buffer = source.read(chunksize)).isEmpty()){
-            destination.write(buffer);
-        }
-        source.close();
-        destination.close();
-        this->modified=0;
-        return 0;
-    }
-    else    //save as
-    {
-        QFile source(this->currentPath);
-        QFile destination(fileName);
-        source.open(QIODevice::ReadOnly);
-        destination.open(QIODevice::ReadWrite);
-        QByteArray buffer;
-        int chunksize = 256;
-        while(!(buffer = source.read(chunksize)).isEmpty()){
-            destination.write(buffer);
-        }
-        source.close();
-        destination.close();
-        this->modified=0;
-        this->currentPath=fileName;
-        this->originalPath=fileName;
-        return 0;
-    }
-    //if name is specified, just copy the file.
-}
-
 void ImageFile::setAttrbute(QString file, bool recursive, QString attribs)
 {
+    if (this->operationMode==ImageFile::ReadOnly)
+        return;
     //set attributes. Letter - is, dash - remove, X - doesn't matter.
     this->prepareForModify();
 
@@ -495,9 +540,3 @@ void ImageFile::setAttrbute(QString file, bool recursive, QString attribs)
     return;
 }
 
-//Forces modification state. Use with care. Use only if the file has been prepared for modify
-//and the modification was performed outside of this class.
-void ImageFile::forceModified(bool mod)
-{
-    this->modified=mod;
-}

@@ -146,6 +146,7 @@
     </property>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
+    <addaction name="actionOpen_as_Read_only"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
     <addaction name="separator"/>
@@ -254,6 +255,9 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionExit">
@@ -420,6 +424,11 @@
    </property>
    <property name="text">
     <string>Wipe free space...</string>
+   </property>
+  </action>
+  <action name="actionOpen_as_Read_only">
+   <property name="text">
+    <string>Open as Read-only</string>
    </property>
   </action>
  </widget>

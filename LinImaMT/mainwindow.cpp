@@ -45,6 +45,11 @@
 //to bypass Windows drive letters. This way we can use multi-image approach to copy files
 //without touching the hard disk buffer: mcopy -p -m 2:/command.com 3:/
 
+//This would require direct mode as copying large files to temp dir is NOT a solution.
+//direct mode should be enabled/disabled by default on opening
+//there also shiould be size threshold. All >=4MB open as disk, select partition,
+// +checkbox for direct/non-direct mode
+
 MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -94,6 +99,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 
     this->img=NULL;
     ui->twFileTree->setDragDropMode(QTreeWidget::NoDragDrop);
+    ui->twDirTree->setDragDropMode(QTreeWidget::NoDragDrop);
 
 
     //PARSE PARAMETERS
@@ -154,6 +160,18 @@ void MainWindow::visualizeModified()
     if (wt.at(wt.length()-1)=='*')
     {
         this->setWindowTitle(this->windowTitle()+" *");
+    }
+
+    if(this->img->getHandleMode()==ImageFile::ReadOnly)
+    {
+        this->setWindowTitle(this->windowTitle()+" [READ ONLY]");
+        return;
+    }
+
+    if(this->img->getHandleMode()==ImageFile::DirectMode)
+    {
+        this->setWindowTitle(this->windowTitle()+" [DIRECT MODE]");
+        return;
     }
 
     wt=this->windowTitle();
@@ -321,6 +339,13 @@ void MainWindow::statusBarNormal()
        ui->actionDelete_selected->setEnabled(0);
    }
    ui->statusBar->showMessage(sb);
+
+   if (this->img->getHandleMode()==ImageFile::ReadOnly)
+   {
+       ui->actionAttributes->setEnabled(0);
+       ui->actionRename->setEnabled(0);
+       ui->actionDelete_selected->setEnabled(0);
+   }
 }
 
 //on window close
@@ -400,6 +425,30 @@ void MainWindow::enableUI(bool state)
     ui->actionVolume->setEnabled(state);
     ui->actionWipe_free_space->setEnabled(state);
     ui->actionGoUp->setEnabled(state);
+    ui->twDirTree->setAcceptDrops(state);
+    ui->twFileTree->setAcceptDrops(state);
+
+    if (this->img==NULL)
+        return;
+
+    if (this->img->getHandleMode()==ImageFile::ReadOnly)
+    {
+        ui->actionSave->setEnabled(0);
+        ui->actionCreate_Directory->setEnabled(0);
+        ui->actionAdd->setEnabled(0);
+        ui->actionAttributes->setEnabled(0);
+        ui->actionAdd_Directories->setEnabled(0);
+        ui->actionWipe_free_space->setEnabled(0);
+        ui->twDirTree->setAcceptDrops(0);
+        ui->twFileTree->setAcceptDrops(0);
+        ui->actionDelete_selected->setEnabled(0);
+        this->leLabel->setEnabled(0);
+    }
+    if (this->img->getHandleMode()==ImageFile::DirectMode)
+    {
+        ui->actionSave->setEnabled(0);
+        ui->actionCreate_Directory->setEnabled(0);
+    }
 }
 
 
@@ -681,7 +730,7 @@ void MainWindow::on_label_edit()
 }
 
 //open file action
-void MainWindow::on_actionOpen_triggered()
+void MainWindow::on_actionOpen_triggered(ImageFile::HandleMode mode)
 {
     if ((this->img!=NULL)&&(this->img->getModified()))
     {
@@ -700,20 +749,25 @@ void MainWindow::on_actionOpen_triggered()
     {
         ui->statusBar->showMessage("Loading file ...");
         QApplication::processEvents();
-        this->loadFile(fname);
+        this->loadFile(fname, mode);
         //we don't need to refresh status bar as it has been done with visualization
 
     }
 }
 
+void MainWindow::on_actionOpen_as_Read_only_triggered()
+{
+    this->on_actionOpen_triggered(ImageFile::ReadOnly);
+}
+
 //load file procedure
-int MainWindow::loadFile(QString fileName)
+int MainWindow::loadFile(QString fileName, ImageFile::HandleMode mode)
 {
     this->enableUI(0);
     this->currentFile=fileName;
     //Mantle interface
     if (this->img) this->img->disposeFile();
-    this->img = new ImageFile(fileName);
+    this->img = new ImageFile(fileName,mode);
     ui->twFileTree->setImageFile(this->img);
     this->dirs=this->img->getContents("::/");
     if ((this->img->getFreeSpace()==0)&&(this->img->getUsedSpace()==0)&&(this->img->getSerial()==""))
@@ -861,7 +915,7 @@ void MainWindow::on_actionVolume_Serial_triggered()
         return;
     }
 
-    //set
+    //Read Only is maintained in image.
     this->img->setSerial(destination);
     this->visualizeModified();
     ui->statusBar->showMessage("Serial number has been changed");
@@ -1104,7 +1158,12 @@ void MainWindow::on_actionNew_triggered()
 //Boot sector properties window
 void MainWindow::on_actionVolume_triggered()
 {
-    bootSector(this,this->img,0,512).exec();
+    bool r=0;
+    if (this->img->getHandleMode()==ImageFile::ReadOnly)
+    {
+        r=1;
+    }
+    bootSector(this,this->img,0,512,r).exec();
 
     //refresh drive info
     this->dirs=this->img->getContents("::/");
@@ -1154,3 +1213,4 @@ void MainWindow::on_actionWipe_free_space_triggered()
     this->visualize();
     this->visualizeModified();
 }
+

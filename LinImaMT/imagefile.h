@@ -15,9 +15,15 @@ public:
         QString attrib;
     };
 
+    //This decides how image is opened. By default, new images have default mode,
+    enum HandleMode {  //while hard disk images can be decided.
+        DefaultMode = 0,
+        ReadOnly = 1,
+        DirectMode = 2,
+    };
 
-    ImageFile(QString imagePath); //open existing
-    ImageFile(int imageSize, QString imageInit);   //create new, imagesize doesn't work yet, string is string for formatter
+    ImageFile(QString imagePath, HandleMode a=ImageFile::DefaultMode); //open existing
+    ImageFile(int imageSize, QString imageInit, HandleMode a=ImageFile::DefaultMode);   //create new, imagesize doesn't work yet, string is string for formatter
     void disposeFile(); //disposes temp file is present
     int copyFile(QString source, QString destination);
     int moveFile(QString source, QString destination);
@@ -25,6 +31,7 @@ public:
     int makeFolder(QString path);
     QList<fileEntry> getContents(QString home);              //return contents for visualization
                                                              //also used to reload basic attributes like serial or label
+    HandleMode getHandleMode();
     int getFreeSpace();
     int getUsedSpace();
     QString getLabel();
@@ -41,7 +48,7 @@ public:
 
 
 private:
-
+    HandleMode operationMode;
     int execute(QString command, QString parameters, QString &result);
     int errorMessage(QString text, QString console);
 

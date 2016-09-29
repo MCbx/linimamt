@@ -13,7 +13,7 @@ class bootSector : public QDialog
     Q_OBJECT
 
 public:
-    explicit bootSector(QWidget *parent = 0, ImageFile * image = NULL, int offset = 0, int length = 512);
+    explicit bootSector(QWidget *parent = 0, ImageFile * image = NULL, int offset = 0, int length = 512, bool ReadOnly = 0);
     ~bootSector();
 
 private slots:
