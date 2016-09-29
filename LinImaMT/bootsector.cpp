@@ -161,16 +161,35 @@ void bootSector::on_pushButton_clicked()
     char newBPBSize=0;
     file.read(&newBPBSize,1);
 
-    if ((newBPBSize!=getBlock-2)&&(ui->cbPreserveBIOS->isChecked()))
+//    if (((unsigned char)newBPBSize>getBlock-11)&&(ui->cbPreserveBIOS->isChecked()))
+//    {
+//        QMessageBox::StandardButton reply;
+//        reply = QMessageBox::question(this, "Wrong size",
+//                                      "In loaded sector, BIOS block has length 0x"+QString::number((unsigned char)newBPBSize,16).toUpper()+
+//                                      "\nAnd the image or setting is 0x"+QString::number(getBlock-11,16).toUpper()+"\n Do you want to continue?",
+//                                      QMessageBox::Yes|QMessageBox::No);
+//        if (reply==QMessageBox::No)
+//            return;
+//    }
+
+    if (((unsigned char)newBPBSize<getBlock-11)&&(ui->cbPreserveBIOS->isChecked()))
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this, "Wrong size",
                                       "In loaded sector, BIOS block has length 0x"+QString::number((unsigned char)newBPBSize,16).toUpper()+
-                                      "\nAnd the image or setting is 0x"+QString::number(getBlock-2,16).toUpper()+"\n This will likely fail. Do you want to continue?",
-                                      QMessageBox::Yes|QMessageBox::No);
-        if (reply==QMessageBox::No)
+                                      "\nAnd the image or setting is 0x"+QString::number(getBlock-11,16).toUpper()+"\nThis will likely fail.\n"
+                                      "Press Yes to continue and probably overwrite part of bootloader code.\n"
+                                      "Press No to preserve only loaded sector's BPB (0x"+QString::number((unsigned char)newBPBSize,16).toUpper()+" Bytes). This may work.\n"
+                                      "Press Cancel to abandon importing.",
+                                      QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+        if (reply==QMessageBox::Cancel)
             return;
+        if (reply==QMessageBox::No)
+        {
+            BIOSBlock.truncate(newBPBSize);
+        }
     }
+
     file.seek(0); //After calling size() - Qt4 bug on BSD.
     this->sectorData=file.readAll();
     file.close();
@@ -261,6 +280,7 @@ void bootSector::refreshView()
     //5. Extract end of BIOS block
     int jumpTo=this->sectorData.at(1)+2;
     ui->leBIOSEnds->setText(QString::number(jumpTo,16).rightJustified(2,'0').toUpper());
+    ui->leBIOSEnds->setToolTip(ui->leBIOSEnds->text());
 }
 
 void bootSector::on_bootSector_accepted()
@@ -296,11 +316,28 @@ void bootSector::on_cbPreserveBIOS_clicked()
         ui->cbPreserveSerial->setEnabled(0);
         ui->cbPreserveSerial->setChecked(1);
         ui->leBIOSEnds->setEnabled(1);
+        ui->checkBox->setEnabled(1);
      } else {
         ui->cbPreserveLabel->setEnabled(1);
         ui->cbPreserveLabel->setChecked(0);
         ui->cbPreserveSerial->setEnabled(1);
         ui->cbPreserveSerial->setChecked(0);
         ui->leBIOSEnds->setEnabled(0);
+        ui->checkBox->setEnabled(0);
+    }
+}
+
+//base BPB
+void bootSector::on_checkBox_clicked(bool checked)
+{
+    if (checked)
+    {
+        ui->leBIOSEnds->setText("1B");
+        ui->leBIOSEnds->setEnabled(0);
+    }
+    else
+    {
+        ui->leBIOSEnds->setText(ui->leBIOSEnds->toolTip());
+        ui->leBIOSEnds->setEnabled(1);
     }
 }

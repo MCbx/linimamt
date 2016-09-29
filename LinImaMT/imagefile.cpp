@@ -82,7 +82,6 @@ QString ImageFile::getCurrentPath()
 {
     return this->currentPath;
 }
-
 ImageFile::HandleMode ImageFile::getHandleMode()
 {
     return this->operationMode;

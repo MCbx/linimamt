@@ -31,6 +31,8 @@ private slots:
 
     void on_cbPreserveBIOS_clicked();
 
+    void on_checkBox_clicked(bool checked);
+
 private:
     Ui::bootSector *ui;
     void refreshView();

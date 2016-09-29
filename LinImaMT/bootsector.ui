@@ -228,7 +228,7 @@
     <rect>
      <x>10</x>
      <y>90</y>
-     <width>411</width>
+     <width>391</width>
      <height>20</height>
     </rect>
    </property>
@@ -236,7 +236,7 @@
     <string>Use to preserve disk geometry and root directory information when substituting boot block from drive with other geometry</string>
    </property>
    <property name="text">
-    <string>Preserve a whole BIOS block when loading, saving 0x0B until</string>
+    <string>Preserve a whole BIOS block when loading, from 0x0B to</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="leBIOSEnds">
@@ -245,9 +245,9 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>430</x>
+     <x>400</x>
      <y>88</y>
-     <width>61</width>
+     <width>51</width>
      <height>22</height>
     </rect>
    </property>
@@ -256,8 +256,27 @@
      <family>Courier</family>
     </font>
    </property>
+   <property name="toolTip">
+    <string notr="true"/>
+   </property>
    <property name="maxLength">
     <number>5</number>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>455</x>
+     <y>88</y>
+     <width>141</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>0x1B (base BPB)</string>
    </property>
   </widget>
  </widget>

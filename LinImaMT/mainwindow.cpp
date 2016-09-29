@@ -112,9 +112,18 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 
         if (QFile::exists(arguments[1]))
         {
+            ImageFile::HandleMode mode=ImageFile::DefaultMode;
+            if (arguments.count()>=3)
+            {
+                if (arguments[2]=="-r")
+                    mode=ImageFile::ReadOnly;
+                if (arguments[2]=="-d")
+                    mode=ImageFile::DirectMode;
+            }
+
             ui->statusBar->showMessage("Loading file ...");
             QApplication::processEvents();
-            this->loadFile(arguments[1]);
+            this->loadFile(arguments[1],mode);
         } else
         {
             QMessageBox::information(0,"Problem","Parameter unknown and file does not exist: "+arguments[1]);
@@ -197,6 +206,12 @@ void MainWindow::visualizeModified()
 //Display question about saving
 int MainWindow::askForSave()
 {
+    //if we are in direct mode, this has no meaning, even if the file is modified
+    if (this->img->getHandleMode()==ImageFile::DirectMode)
+    {
+        return 0;
+    }
+
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "File modified","Do you want to save before closing the file?",QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
     if (reply==QMessageBox::Yes)
@@ -799,7 +814,21 @@ void MainWindow::on_actionSave_As_triggered()
     if (fname!=".img")
     {
         this->img->saveFile(fname);
-        this->currentFile=fname;
+//        this->currentFile=fname;
+
+        //Reopen file
+        ImageFile::HandleMode currentMode=this->img->getHandleMode();
+        int imasize=this->img->getFreeSpace()+this->img->getUsedSpace();
+        if ((currentMode==ImageFile::ReadOnly)&&(imasize<3145728)) //Read only -> Default
+        {
+            //reopen the file in ordinary mode
+            this->loadFile(fname,ImageFile::DefaultMode);
+        }
+        else        //Default -> default, Direct -> direct
+        {
+            this->loadFile(fname,currentMode);
+        }
+
         visualizeModified();
     }
 

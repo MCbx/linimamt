@@ -3,7 +3,7 @@ LinIMAmt
 
 ![Screenshot](https://raw.githubusercontent.com/MCbx/linimamt/master/sshot.png)
 
-This is a quick-and-dirty GUI for GNU Mtools made in Qt. It is dedicated to opening, browsing, extracting and composing 
+This is a quick-and-dirty GUI for GNU Mtools made in Qt. It is dedicated for opening, browsing, extracting and composing
 floppy disk image files. It is a project under slow development, and the simple functionality has been achieved allowing
 to work with disk images. When it will be done, it will be shared with other programs.
 
@@ -46,7 +46,7 @@ Most important things to do:
  * Refactoring code. This window class with everything thrown into it doesn't look good.
  * Do something with directory structure visualization code as it's quite bad now.
  * Change the name to something which can be pronounced (after I've made HGCFEU and FTDU it should be more English in name). The current name is directly taken from "Linux", "Image" and "Mtools".
- * Windows port. It is developed under Linux.
+ * Windows port. It is developed under Linux. There is a mtools for Windows and TestDisk for Windows.
 
 Links
 =======
@@ -54,3 +54,4 @@ Links
  * https://www.gnu.org/software/mtools/ - GNU MTools home page
  * https://www.gnu.org/software/mtools/manual/mtools.html - GNU Mtools manual
  * http://oldcomputer.info/software/ - page with my software. Server may be periodically down.
+ * http://reboot.pro/files/file/267-mtools/ - Mtools Windows port
