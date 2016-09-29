@@ -22,8 +22,9 @@
 //////// MEMENTO ////////
 //      TODO LIST      //
 // Drag-drop:
-//   - implementation of extracting
+//   - implementation of drop-extracting
 // revamp error dialog to use sessions
+// Check conditions for file existing
 // Mess with metadata!
 
 //these need mounting to letters
@@ -47,7 +48,7 @@
 
 //This would require direct mode as copying large files to temp dir is NOT a solution.
 //direct mode should be enabled/disabled by default on opening
-//there also shiould be size threshold. All >3MB open as disk, select partition,
+//there also should be size threshold. All >3MB open as disk, select partition,
 // +choose to open direct mode, read only, conventional mode.
 
 MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
@@ -155,7 +156,7 @@ MainWindow::~MainWindow()
 ////////////////////////////
 ///   GENERAL ROUTINES   ///
 ////////////////////////////
-
+#define FOLDINGSTART {
 //shows asterisk if file is modified
 void MainWindow::visualizeModified()
 {
@@ -478,12 +479,12 @@ void MainWindow::enableUI(bool state)
         ui->actionCreate_Directory->setEnabled(0);
     }
 }
-
+#define FOLDINGEND }
 
 /////////////////////////////
 ///   FILE AND DIR VIEW   ///
 /////////////////////////////
-
+#define FOLDINGSTART {
 //this thing sorts the doirectories always upwards.
 void MainWindow::customSortByColumn(int column)
 {
@@ -695,6 +696,10 @@ void MainWindow::on_fileDragDrop(QString from, QString to)
 
     if ((from.startsWith("file://"))||(to.startsWith("file://")))
     {
+        if (from.startsWith("file://"))
+        {
+            //TODO: Check don't we have such file
+        }
         //copy
         from=from.replace("file://","");
         to=to.replace("file://","");
@@ -740,12 +745,12 @@ void MainWindow::on_actionGoUp_triggered()
     }
     ui->twDirTree->setCurrentItem(ui->twDirTree->currentItem()->parent());
 }
-
+#define FOLDINGEND }
 
 /////////////////////////////
 ///     IMAGE ACTIONS     ///
 /////////////////////////////
-
+#define FOLDINGSTART {
 //edit label
 void MainWindow::on_label_edit()
 {
@@ -1256,7 +1261,7 @@ void MainWindow::on_actionWipe_free_space_triggered()
     this->visualizeModified();
 }
 
-
+//Run Testdisk. Ask about working dir before as user may want to recover files
 void MainWindow::on_actionRun_TestDisk_on_image_triggered()
 {
     QFileDialog fileDlg(this,"Speciwy working directory foe recovered files","","All files (*)");
@@ -1272,3 +1277,6 @@ void MainWindow::on_actionRun_TestDisk_on_image_triggered()
 
     QProcess::startDetached(testDiskPath,par,fileDlg.selectedFiles()[0]);
 }
+
+
+#define FOLDINGEND }

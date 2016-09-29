@@ -43,9 +43,7 @@ private slots:
     void on_twFileTree_customContextMenuRequested(const QPoint &pos);
     void on_actionVolume_triggered();
     void on_actionWipe_free_space_triggered();
-
     void on_actionOpen_as_Read_only_triggered();
-
     void on_actionRun_TestDisk_on_image_triggered();
 
 private:
