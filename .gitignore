@@ -1,3 +1,7 @@
 build-*
 *.pro.user*
 .directory
+*.pro.user
+*.qbs.user
+*.qbs.user.*
+*.moc
