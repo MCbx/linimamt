@@ -37,7 +37,7 @@ private slots:
     void on_actionDelete_selected_triggered();
     void on_actionAdd_triggered();
     void on_actionAdd_Directories_triggered();
-    void on_fileDragDrop(QString from, QString to);
+    void on_fileDragDrop(QStringList from, QString to);
     void on_actionAttributes_triggered();
     void on_actionNew_triggered();
     void on_twFileTree_customContextMenuRequested(const QPoint &pos);
@@ -68,6 +68,8 @@ private:
     void loadSettings();
     void enableUI(bool state);
     int askForSave();
+
+    char askForReplacement(bool &SkipAll, bool &overwriteAll, QString from, QString to);
 
     //ui components
     QLineEdit * leAddress;

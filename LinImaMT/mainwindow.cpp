@@ -23,8 +23,6 @@
 //      TODO LIST      //
 // Drag-drop:
 //   - implementation of drop-extracting
-// revamp error dialog to use sessions
-// Check conditions for file existing
 // Mess with metadata!
 
 //these need mounting to letters
@@ -56,8 +54,8 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    connect(ui->twFileTree,SIGNAL(sigDragDrop(QString,QString)),this,SLOT(on_fileDragDrop(QString,QString)));
-    connect(ui->twDirTree,SIGNAL(sigDragDrop(QString,QString)),this,SLOT(on_fileDragDrop(QString,QString)));
+    connect(ui->twFileTree,SIGNAL(sigDragDrop(QStringList,QString)),this,SLOT(on_fileDragDrop(QStringList,QString)));
+    connect(ui->twDirTree,SIGNAL(sigDragDrop(QStringList,QString)),this,SLOT(on_fileDragDrop(QStringList,QString)));
 
     //VERIFY EXISTENCE OF MTOOLS!
     this->process=new QProcess(this);   //TO BE PORTED win
@@ -170,6 +168,7 @@ void MainWindow::visualizeModified()
     }
     else
     {
+        this->img->finishProcedure();
         if (this->currentFile=="")
         {
             this->setWindowTitle("LinimaMT - [untitled]");
@@ -479,6 +478,61 @@ void MainWindow::enableUI(bool state)
         ui->actionCreate_Directory->setEnabled(0);
     }
 }
+
+//helper function to check file existence and ask for overwriting.
+char MainWindow::askForReplacement(bool &skipAll, bool &overwriteAll, QString from, QString to)
+{
+    char replaceMode='0';
+  //  if (from.endsWith('/'))
+  //  {
+   //     from=from.left(from.count()-1);   //we cannot.
+  //  }
+    QString check=from.split('/').last();
+    check=check.toUpper();
+
+    bool duplicate=0; //we have to find it in model
+    for (int j=0;j<this->dirs.count();j++)
+    {
+        if (this->dirs.at(j).name.toUpper()==to.toUpper()+check.toUpper())
+        {
+            duplicate=1;
+            break;
+        }
+    }
+    if(duplicate)
+    {
+        //such item exists
+        QMessageBox::StandardButton reply=QMessageBox::Abort;
+        if ((!skipAll)&&(!overwriteAll))
+        {
+            reply = QMessageBox::question(this, "Item exists",
+                                              "Warning: The item "+check+" seems to exist. \n"
+                                              "Yes to overwrite, No to skip, Cancel to abandon copying.\nIf It's a directory, all files existing inside will be overwritten or skipped.",
+                                              QMessageBox::Yes|QMessageBox::No|QMessageBox::YesToAll|QMessageBox::NoToAll|QMessageBox::Cancel);
+        }
+        if (reply==QMessageBox::Cancel)
+         {
+            return '-';
+         }
+        if ((reply==QMessageBox::Yes)||(overwriteAll))
+            replaceMode='o';
+        if ((reply==QMessageBox::No)||(skipAll))
+            replaceMode='s';
+        if (reply==QMessageBox::YesToAll)
+        {
+            replaceMode='o';
+            overwriteAll=1;
+        }
+        if (reply==QMessageBox::NoToAll)
+        {
+            replaceMode='s';
+            skipAll=1;
+        }
+
+    }
+    return replaceMode;
+}
+
 #define FOLDINGEND }
 
 /////////////////////////////
@@ -507,6 +561,7 @@ void MainWindow::customSortByColumn(int column)
 //visualize trees
 void MainWindow::visualize()
 {
+    this->img->finishProcedure();
     //Save position.
     QString currentDir="::/"; //if you don't know what to do, use root directory. It always exists
     if (ui->twDirTree->selectedItems().count()>0)
@@ -683,32 +738,80 @@ void MainWindow::on_twFileTree_itemSelectionChanged()
 }
 
 //this executes if valid content is dropped in valid place.
-void MainWindow::on_fileDragDrop(QString from, QString to)
+void MainWindow::on_fileDragDrop(QStringList from, QString to)
 {
    // QMessageBox::critical(this,"Drag",from+" into "+to);
-
 
     //We have the following situations:
     //1. Inside image - we move files
     //2. anything outside image - we copy files.
-    //This is really bad, but Qt can't use ctrl, and we can't launch menu
-    //as its position is always screwed up only in KDE.
-
-    if ((from.startsWith("file://"))||(to.startsWith("file://")))
+    if ((from.at(0).startsWith("file://"))||(to.startsWith("file://")))
     {
-        if (from.startsWith("file://"))
+        if (from.at(0).startsWith("file://"))
         {
-            //TODO: Check don't we have such file
+            //we copy from outside to inside
+            //1. Check outside's size
+            //2. If larger than img->freeSpace, ask user what to do.
+            int importedSize=0;
+            for (int i=0;i<from.count();i++)    //Calculate added files size
+            {
+                QString k=from.at(i);
+                QFile f(k.replace("file://",""));
+                QFileInfo fi(f);
+                if ((fi.exists())&&(fi.isFile()))
+                {
+                    importedSize+=fi.size();
+                }
+                if ((fi.exists())&&(fi.isDir()))
+                {
+                    importedSize+=dir_size(k.replace("file://",""));
+                }
+
+            }
+            if (this->img->getFreeSpace()<importedSize) //Ask user what to do if it will not fit.
+            {
+                QMessageBox::StandardButton reply;
+                reply = QMessageBox::question(this, "Free space problem",
+                                                      "Warning: There is "+QString::number(this->img->getFreeSpace())+" Bytes free on image. \n"
+                                                      "Selected items are larger: "+QString::number(importedSize)+" bytes. Not all files may get imported. Do you want to continue?",
+                                                      QMessageBox::Yes|QMessageBox::No);
+                 if (reply==QMessageBox::No)
+                    return;
+            }
         }
-        //copy
-        from=from.replace("file://","");
-        to=to.replace("file://","");
-        this->img->copyFile(from,to);
+
+        //Then we copy. Let's check for existing file.
+        bool skipAll=0;
+        bool overwriteAll=0;
+        for (int i=0;i<from.count();i++)
+        {
+
+            QString src=from.at(i);
+            src=src.replace("file://","");
+
+            char replaceMode=this->askForReplacement(skipAll,overwriteAll,src,to);
+            if (replaceMode=='-')
+                return;
+
+            this->img->copyFile(src,to.replace("file://",""),replaceMode);
+        }
     }
     else
     {
-        //move
-        this->img->moveFile(from,to);
+        //we move files inside
+        //generally there is no problem with size, only files existence.
+        bool skipAll=0;
+        bool overwriteAll=0;
+        for (int i=0;i<from.count();i++)
+        {
+            QString src=from.at(i);
+            src=src.replace("file://","");
+
+            char replaceMode=this->askForReplacement(skipAll,overwriteAll,src,to);
+            if (replaceMode=='-')
+                return;
+            this->img->moveFile(src,to.replace("file://",""),replaceMode);
+        }
     }
 
     //refresh
@@ -810,6 +913,7 @@ int MainWindow::loadFile(QString fileName, ImageFile::HandleMode mode)
         this->leAddress->setText("::/");
         this->leLabel->clear();
         this->setWindowTitle("LinImaMT");
+        this->img->finishProcedure();
         return 0;
     }
     //Visualize directories
@@ -818,6 +922,7 @@ int MainWindow::loadFile(QString fileName, ImageFile::HandleMode mode)
     ui->twDirTree->setCurrentItem(ui->twDirTree->topLevelItem(0));  //select first item. Do not remove this.
         ui->twFileTree->setDragDropMode(QTreeWidget::DragDrop);
     this->enableUI(1);
+    this->img->finishProcedure();
     return 0;
 }
 
@@ -832,6 +937,7 @@ void MainWindow::on_actionSave_As_triggered()
     if (fname!=".img")
     {
         this->img->saveFile(fname);
+        this->img->finishProcedure();
 //        this->currentFile=fname;
 
         //Reopen file
@@ -1055,12 +1161,19 @@ void MainWindow::on_actionAdd_triggered()
          }
     }
 
+    bool skipAll=0;
+    bool overwriteAll=0;
     for (int i=0;i<fileDlg.selectedFiles().count();i++)
     {
-            QString fileName=fileDlg.selectedFiles().at(i);
-            ui->statusBar->showMessage("Adding "+fileName+" ("+QString::number(i)+"/"+QString::number(fileDlg.selectedFiles().count())+")");
-            QApplication::processEvents();
-            this->img->copyFile(fileName,this->leAddress->text());
+         QString fileName=fileDlg.selectedFiles().at(i);
+         ui->statusBar->showMessage("Adding "+fileName+" ("+QString::number(i)+"/"+QString::number(fileDlg.selectedFiles().count())+")");
+         QApplication::processEvents();
+
+         char replaceMode=this->askForReplacement(skipAll,overwriteAll,fileName,this->leAddress->text());
+         if (replaceMode=='-')
+             return;
+
+         this->img->copyFile(fileName,this->leAddress->text(),replaceMode);
     }
 
     //refresh
@@ -1087,7 +1200,9 @@ void MainWindow::on_actionAdd_Directories_triggered()
 
     fsize=dir_size(fileDlg.selectedFiles().at(0));
 
-    if (fsize>(uint)this->img->getFreeSpace())
+    bool skipAll=0;
+    bool overwriteAll=0; //not used in single-shot approach, but prepared if multiple directories will be selected
+    if (fsize>(uint)this->img->getFreeSpace()) //directory size too big consequences
     {
         //Marian, to jebnie!
          QMessageBox::StandardButton reply;
@@ -1100,10 +1215,15 @@ void MainWindow::on_actionAdd_Directories_triggered()
          }
     }
 
-            QString fileName=fileDlg.selectedFiles().at(0);
-            ui->statusBar->showMessage("Adding "+fileName);
-            QApplication::processEvents();
-            this->img->copyFile(fileName,this->leAddress->text());
+    QString fileName=fileDlg.selectedFiles().at(0);
+    ui->statusBar->showMessage("Adding "+fileName);
+    QApplication::processEvents();
+
+    char replaceMode=this->askForReplacement(skipAll,overwriteAll,fileName,this->leAddress->text());
+    if (replaceMode=='-')
+        return;
+
+    this->img->copyFile(fileName,this->leAddress->text(),replaceMode);
 
     //refresh
     this->dirs=this->img->getContents("::/");

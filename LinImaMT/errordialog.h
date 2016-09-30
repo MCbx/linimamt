@@ -14,9 +14,14 @@ class ErrorDialog : public QDialog
 public:
     explicit ErrorDialog(QWidget *parent = 0, QString text="", QString cons="");
     ~ErrorDialog();
+    void append(int code, QString text, QString console);
+    void showIt(bool always);
 
 private:
     Ui::ErrorDialog *ui;
+    int code;
+    QString console;
+    QString text;
 };
 
 #endif // ERRORDIALOG_H

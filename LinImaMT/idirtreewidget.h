@@ -33,7 +33,7 @@ private:
   //  QString currentDir; //the control must be aware of the current directory viewed!
 
 signals:
-    void sigDragDrop(QString from, QString to); //this one gets emitted when drag-drop actio has been made
+    void sigDragDrop(QStringList from, QString to); //this one gets emitted when drag-drop actio has been made
 };
 
 #endif // IDIRTREEWIDGET_H

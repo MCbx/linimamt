@@ -25,8 +25,8 @@ public:
     ImageFile(QString imagePath, HandleMode a=ImageFile::DefaultMode, qint64 offset=-1); //open existing
     ImageFile(int imageSize, QString imageInit, HandleMode a=ImageFile::DefaultMode);   //create new, imagesize doesn't work yet, string is string for formatter
     void disposeFile(); //disposes temp file is present
-    int copyFile(QString source, QString destination);
-    int moveFile(QString source, QString destination);
+    int copyFile(QString source, QString destination, char defaultAction='0'); //action is o - overwrite, s - skip, 0 - default
+    int moveFile(QString source, QString destination, char defaultAction='0');
     int deleteFile(QString source);
     int makeFolder(QString path);
     QList<fileEntry> getContents(QString home);              //return contents for visualization
@@ -45,12 +45,12 @@ public:
     int saveFile(QString fileName);
     QString getCurrentPath();  //returns current file's name and path
     void forceModified(bool); //forces modified state
-
+    void finishProcedure(); //this displays error dialog if needed
 
 private:
     HandleMode operationMode;
     int execute(QString command, QString parameters, QString &result);
-    int errorMessage(QString text, QString console);
+    int errorMessage(int code, QString text, QString console);
     qint64 offset;             //offset of partition.
 
     bool modified;
@@ -61,6 +61,7 @@ private:
     QString label;
     QString serial;
     QTemporaryFile * tmpF;
+    ErrorDialog * procedureError; //this is an error session.
 };
 
 #endif // IMAGEFILE_H

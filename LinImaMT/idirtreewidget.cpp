@@ -19,6 +19,7 @@ bool IDirTreeWidget::dropMimeData(QTreeWidgetItem *parent, int index, const QMim
     }
 
     urlList = data->urls(); // retrieve list of urls
+    QStringList sources;
     foreach(QUrl url, urlList) // iterate over list
     {
         if ((dest!="")||( url.isLocalFile() ) )
@@ -36,11 +37,15 @@ bool IDirTreeWidget::dropMimeData(QTreeWidgetItem *parent, int index, const QMim
                         (source!=dest))
                 {
                     //launch what should be launched
-                    emit sigDragDrop(source,dest);
+                    sources.append(source);
                 }
             }
           //  this->clearSelection(); //without it it will lock into multiselect
         }
+    }
+    if (sources.length()>0)
+    {
+        emit sigDragDrop(sources,dest);
     }
 
 //    this->setCurrentItem(destination);

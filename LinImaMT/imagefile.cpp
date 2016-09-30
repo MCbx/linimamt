@@ -7,6 +7,7 @@
 //open image
 ImageFile::ImageFile(QString imagePath, HandleMode a, qint64 offset)
 {
+    this->procedureError=NULL;
     this->tmpF=NULL;
     this->currentPath=imagePath;
     this->originalPath=imagePath;
@@ -19,6 +20,7 @@ ImageFile::ImageFile(QString imagePath, HandleMode a, qint64 offset)
 ImageFile::ImageFile(int imageSize, QString imageInit, HandleMode a)
 {
     this->modified=0;
+    this->procedureError=NULL;
     if (imageSize<0)
             return;
     //create new tmp file
@@ -36,7 +38,7 @@ ImageFile::ImageFile(int imageSize, QString imageInit, HandleMode a)
     int status=this->execute("mformat",imageInit,op);
     if ((status!=0)||(op.contains("\nTrouble ")))
     {
-        errorMessage("Failed to format the image. Code "+QString::number(status),op);
+        errorMessage(status,"Failed to format the image. Code "+QString::number(status),op);
         return;
     }
     this->operationMode=a;
@@ -115,11 +117,17 @@ int ImageFile::execute(QString command, QString parameters, QString &result)    
 }
 
 //throw a nice, GUI-based error message with a console
-int ImageFile::errorMessage(QString text, QString console)
+int ImageFile::errorMessage(int code, QString text, QString console)
 {
-    ErrorDialog * a = new ErrorDialog(NULL,text,console);
-    a->show();
-    return 0;
+    if (this->procedureError!=NULL)
+    {
+        this->procedureError->append(code,text,console);
+    }
+    else
+    {
+        this->procedureError=new ErrorDialog(0,"","");
+        this->procedureError->append(code,text,console);
+    }
 }
 
 //this function prepares file for modification, it does NOT set modified flag yet.
@@ -209,6 +217,17 @@ void ImageFile::forceModified(bool mod)
     this->modified=mod;
 }
 
+//shuts a series of operations down giving a log if error happened
+//Dear GUI programmer, please do it after series of ImageFile procedure calls
+void ImageFile::finishProcedure()
+{
+    if (this->procedureError!=NULL)
+    {
+        this->procedureError->showIt(0);
+        this->procedureError=NULL;
+    }
+}
+
 ///////////////////////////
 ///    IMAGE EDITING    ///
 ///////////////////////////
@@ -254,7 +273,7 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
         status=this->execute("mdir","-/ -a \""+home+"\"",op);
         if (status!=0)
         {
-            errorMessage("Failed to acquire listing, code: "+QString::number(status),op);
+            errorMessage(status,"Failed to acquire listing, code: "+QString::number(status),op);
             return dirs;
         }
 
@@ -262,7 +281,7 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
         status=this->execute("mattrib","-/ -X \""+home+"\"",qsattrs);
         if (status!=0)
         {
-            errorMessage("Failed to acquire attributes, code: "+QString::number(status),qsattrs);
+            errorMessage(status,"Failed to acquire attributes, code: "+QString::number(status),qsattrs);
             return dirs;
         }
         QStringList attrs = qsattrs.split('\n');
@@ -399,12 +418,12 @@ QString ImageFile::setLabel(QString label)
     int code=this->execute("mlabel","::\""+label.left(11)+"\"",res);
     if (code!=0)
     {
-        this->errorMessage("Error while setting label. Code: "+QString::number(code),res);
+        this->errorMessage(code,"Error while setting label. Code: "+QString::number(code),res);
     }
     return "";
 }
 
-int ImageFile::moveFile(QString source, QString destination)
+int ImageFile::moveFile(QString source, QString destination, char defaultAction)
 {
     if (this->operationMode==ImageFile::ReadOnly)
         return -1;
@@ -412,20 +431,24 @@ int ImageFile::moveFile(QString source, QString destination)
     QString op;
     if ((destination.contains("\\..\\"))||(destination.contains("/../")))
     {
-        errorMessage("Internal error","Relative path passed");
+        errorMessage(200,"Internal error","Relative path passed");
         return 2;
     }
-    int status=this->execute("mren"," \""+source+"\" \""+destination+"\"",op);
+    QString replaceAction="";
+    if (defaultAction!='0')
+        replaceAction="-D "+QString(defaultAction);
+
+    int status=this->execute("mren",replaceAction+" \""+source+"\" \""+destination+"\"",op);
     if (status!=0)
     {
-        errorMessage("Failed to rename. Code "+QString::number(status),op);
+        errorMessage(status,"Failed to rename. Code "+QString::number(status),op);
         return 1;
     }
     this->modified=1;
     return 0;
 }
 
-int ImageFile::copyFile(QString source, QString destination)
+int ImageFile::copyFile(QString source, QString destination, char defaultAction)
 {
     if (this->operationMode==ImageFile::ReadOnly)
         return -1;
@@ -433,13 +456,18 @@ int ImageFile::copyFile(QString source, QString destination)
     QString op;
     if ((destination.contains("\\..\\"))||(destination.contains("/../")))
     {
-        errorMessage("Internal error","Relative path passed");
+        errorMessage(200,"Internal error","Relative path passed");
         return 2;
     }
-    int status=this->execute("mcopy","-s -p -n -m -v -Q \""+source+"\" \""+destination+"\"",op);
+    QString replaceAction="";
+    if (defaultAction!='0')
+        replaceAction="-D "+QString(defaultAction)+" ";
+
+    int status=this->execute("mcopy","-s -p -n -m -v -Q "+replaceAction+"\""+source+"\" \""+destination+"\"",op);
     if (status!=0)
     {
-        errorMessage("Failed to copy. Code "+QString::number(status),op);
+        errorMessage(status,"Failed to copy. Code "+QString::number(status),op);
+        this->modified=1; //Filed copying may left the image in unknown state - we will mark it as modified.
         return 1;
     }
     this->modified=1;
@@ -454,13 +482,13 @@ int ImageFile::makeFolder(QString path)
     QString op;
     if ((path.contains("\\..\\"))||(path.contains("/../")))
     {
-        errorMessage("Internal error","Relative path passed");
+        errorMessage(200,"Internal error","Relative path passed");
         return 2;
     }
     int status=this->execute("mmd"," \""+path+"\"",op);
     if (status!=0)
     {
-        errorMessage("Failed to add folder. Code "+QString::number(status),op);
+        errorMessage(status,"Failed to add folder. Code "+QString::number(status),op);
         return 1;
     }
     this->modified=1;
@@ -475,13 +503,13 @@ int ImageFile::deleteFile(QString source)
     QString op="";
     if ((source.contains("\\..\\"))||(source.contains("/../")))
     {
-        errorMessage("Internal error","Relative path passed");
+        errorMessage(200,"Internal error","Relative path passed");
         return 2;
     }
     int status=this->execute("mdeltree","-v \""+source+"\"",op);
     if (status!=0)
     {
-        errorMessage("Failed to delete. Code "+QString::number(status),op);
+        errorMessage(status,"Failed to delete. Code "+QString::number(status),op);
         return 1;
     }
     this->modified=1;
@@ -497,7 +525,7 @@ void ImageFile::setSerial(QString serial)
     int status=this->execute("mlabel","::\""+this->label+"\" -N "+serial,op);
     if (status!=0)
     {
-        errorMessage("Failed to modify serial number. Code "+QString::number(status),op);
+        errorMessage(status,"Failed to modify serial number. Code "+QString::number(status),op);
         return;
     }
     this->modified=1;
@@ -539,7 +567,7 @@ void ImageFile::setAttrbute(QString file, bool recursive, QString attribs)
 
     if (status!=0)
     {
-        errorMessage("Failed to set attribute. Code "+QString::number(status),op);
+        errorMessage(status,"Failed to set attribute. Code "+QString::number(status),op);
         return;
     }
 
