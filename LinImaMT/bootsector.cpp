@@ -311,17 +311,17 @@ void bootSector::on_cbPreserveBIOS_clicked()
 {
     if (ui->cbPreserveBIOS->isChecked())
     {
-        ui->cbPreserveLabel->setEnabled(0);
-        ui->cbPreserveLabel->setChecked(1);
-        ui->cbPreserveSerial->setEnabled(0);
-        ui->cbPreserveSerial->setChecked(1);
+       // ui->cbPreserveLabel->setEnabled(0);
+      //  ui->cbPreserveLabel->setChecked(1);
+      //  ui->cbPreserveSerial->setEnabled(0);
+      //  ui->cbPreserveSerial->setChecked(1);
         ui->leBIOSEnds->setEnabled(1);
         ui->checkBox->setEnabled(1);
      } else {
-        ui->cbPreserveLabel->setEnabled(1);
-        ui->cbPreserveLabel->setChecked(0);
-        ui->cbPreserveSerial->setEnabled(1);
-        ui->cbPreserveSerial->setChecked(0);
+     //   ui->cbPreserveLabel->setEnabled(1);
+     //   ui->cbPreserveLabel->setChecked(0);
+     //   ui->cbPreserveSerial->setEnabled(1);
+     //   ui->cbPreserveSerial->setChecked(0);
         ui->leBIOSEnds->setEnabled(0);
         ui->checkBox->setEnabled(0);
     }

@@ -22,6 +22,7 @@ ImageFile::ImageFile(int imageSize, QString imageInit, HandleMode a)
     if (imageSize<0)
             return;
     //create new tmp file
+    this->offset=0;
     this->tmpF = new QTemporaryFile(QDir::temp().absoluteFilePath("imaXXXXXXXX.img"));
     this->tmpF->open();
     this->tmpF->close();
@@ -29,10 +30,11 @@ ImageFile::ImageFile(int imageSize, QString imageInit, HandleMode a)
     this->currentPath=this->tmpF->fileName();
     this->originalPath=this->currentPath; //temporary hack
 
+
     //execute mtools formatter on tmp file
     QString op;
     int status=this->execute("mformat",imageInit,op);
-    if (status!=0)
+    if ((status!=0)||(op.contains("\nTrouble ")))
     {
         errorMessage("Failed to format the image. Code "+QString::number(status),op);
         return;
