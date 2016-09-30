@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     idirtreewidget.cpp \
     attribute.cpp \
     newimage.cpp \
-    bootsector.cpp
+    bootsector.cpp \
+    harddiskopen.cpp
 
 HEADERS  += mainwindow.h \
     errordialog.h \
@@ -29,13 +30,15 @@ HEADERS  += mainwindow.h \
     idirtreewidget.h \
     attribute.h \
     newimage.h \
-    bootsector.h
+    bootsector.h \
+    harddiskopen.h
 
 FORMS    += mainwindow.ui \
     errordialog.ui \
     attribute.ui \
     newimage.ui \
-    bootsector.ui
+    bootsector.ui \
+    harddiskopen.ui
 
 RESOURCES += \
     resources.qrc
