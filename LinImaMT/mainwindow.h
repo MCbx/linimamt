@@ -68,6 +68,7 @@ private:
     void loadSettings();
     void enableUI(bool state);
     int askForSave();
+    qint64 hdImgSize;
 
     char askForReplacement(bool &SkipAll, bool &overwriteAll, QString from, QString to);
 

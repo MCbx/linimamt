@@ -6,9 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>543</width>
-    <height>361</height>
+    <width>520</width>
+    <height>360</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>520</width>
+    <height>360</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>520</width>
+    <height>360</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Open hard disk image...</string>
@@ -16,7 +28,7 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>400</x>
+     <x>370</x>
      <y>270</y>
      <width>131</width>
      <height>81</height>
@@ -32,9 +44,9 @@
   <widget class="QListWidget" name="lwPartitions">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>30</y>
-     <width>491</width>
+     <x>10</x>
+     <y>26</y>
+     <width>501</width>
      <height>192</height>
     </rect>
    </property>
@@ -43,8 +55,8 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>230</y>
-     <width>201</width>
+     <y>220</y>
+     <width>221</width>
      <height>20</height>
     </rect>
    </property>
@@ -53,11 +65,14 @@
    </property>
   </widget>
   <widget class="QSpinBox" name="sbOffset">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
-     <x>230</x>
-     <y>230</y>
-     <width>151</width>
+     <x>250</x>
+     <y>220</y>
+     <width>131</width>
      <height>23</height>
     </rect>
    </property>
@@ -68,8 +83,8 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>10</y>
+     <x>10</x>
+     <y>6</y>
      <width>181</width>
      <height>16</height>
     </rect>
@@ -81,20 +96,20 @@
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>250</y>
-     <width>361</width>
-     <height>101</height>
+     <x>10</x>
+     <y>260</y>
+     <width>341</width>
+     <height>91</height>
     </rect>
    </property>
    <property name="title">
     <string>Open Mode:</string>
    </property>
-   <widget class="QRadioButton" name="sbDirectMode">
+   <widget class="QRadioButton" name="rbDirectMode">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>30</y>
+      <y>20</y>
       <width>331</width>
       <height>20</height>
      </rect>
@@ -113,7 +128,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>50</y>
+      <y>40</y>
       <width>331</width>
       <height>20</height>
      </rect>
@@ -125,14 +140,17 @@
      <string notr="true">buttonGroup</string>
     </attribute>
    </widget>
-   <widget class="QRadioButton" name="rbReadOnly_2">
+   <widget class="QRadioButton" name="rbTempMode">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>70</y>
+      <y>60</y>
       <width>331</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>Allows to save image on demand, but is slow and requires copying image to temporary file</string>
     </property>
     <property name="text">
      <string>Temp file mode (not recommended)</string>
@@ -141,6 +159,19 @@
      <string notr="true">buttonGroup</string>
     </attribute>
    </widget>
+  </widget>
+  <widget class="QLabel" name="lbCHS">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>5</y>
+     <width>231</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>CHS</string>
+   </property>
   </widget>
  </widget>
  <resources/>

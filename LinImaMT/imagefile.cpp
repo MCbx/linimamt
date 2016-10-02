@@ -91,6 +91,10 @@ ImageFile::HandleMode ImageFile::getHandleMode()
 {
     return this->operationMode;
 }
+qint64 ImageFile::getOffset()
+{
+    return this->offset;
+}
 
 //////////////////////////////
 /// IMAGE FILE MAINTENANCE ///
@@ -141,6 +145,11 @@ int ImageFile::prepareForModify()
     if (this->currentPath!=this->originalPath)
     {
         return -1;  //already put into modification
+    }
+    if (this->tmpF)
+    {
+        if (this->originalPath==this->tmpF->fileName())
+            return -1;
     }
     //1. create temporary file
     this->tmpF = new QTemporaryFile(QDir::temp().absoluteFilePath("imaXXXXXXXX.img"));
@@ -279,11 +288,11 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
 
         QString qsattrs;
         status=this->execute("mattrib","-/ -X \""+home+"\"",qsattrs);
-        if (status!=0)
-        {
-            errorMessage(status,"Failed to acquire attributes, code: "+QString::number(status),qsattrs);
-            return dirs;
-        }
+       // if (status!=0)
+       // {
+       //     errorMessage(status,"Failed to acquire attributes, code: "+QString::number(status),qsattrs);
+       //     return dirs;
+       // } //mtools reports presence of directories only as error condition.
         QStringList attrs = qsattrs.split('\n');
 
         //Parse results

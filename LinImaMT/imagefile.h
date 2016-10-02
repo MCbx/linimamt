@@ -46,7 +46,7 @@ public:
     QString getCurrentPath();  //returns current file's name and path
     void forceModified(bool); //forces modified state
     void finishProcedure(); //this displays error dialog if needed
-
+    qint64 getOffset();
 private:
     HandleMode operationMode;
     int execute(QString command, QString parameters, QString &result);

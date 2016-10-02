@@ -18,6 +18,7 @@
 #include "attribute.h"
 #include "newimage.h"
 #include "bootsector.h"
+#include "harddiskopen.h"
 
 //////// MEMENTO ////////
 //      TODO LIST      //
@@ -28,7 +29,6 @@
 //these need mounting to letters
 //Convert image between formats by mounting two images and moving files between
 // - derivative - defrag image - by converting format on itself
-//Open hard disk images - partition choosing ImageFile can now use offset as parameter without files thanks to @@ operator.
 
 //to open many images at once:
 // - configuration file:
@@ -43,11 +43,6 @@
 //Because of a bug/feature in MTools, the drive letter can be 1: 2: etc., what allows us
 //to bypass Windows drive letters. This way we can use multi-image approach to copy files
 //without touching the hard disk buffer: mcopy -p -m 2:/command.com 3:/
-
-//This would require direct mode as copying large files to temp dir is NOT a solution.
-//direct mode should be enabled/disabled by default on opening
-//there also should be size threshold. All >3MB open as disk, select partition,
-// +choose to open direct mode, read only, conventional mode.
 
 MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     QMainWindow(parent),
@@ -106,6 +101,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     ui->twDirTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     //READ SETTINGS
+    this->hdImgSize=3145728;
     this->loadSettings();
 
     this->img=NULL;
@@ -275,6 +271,10 @@ void MainWindow::loadSettings()
     ui->tbAddressBar->setVisible(settings.value("AddressBar",true).toBool());
     ui->actionAddress_bar->setChecked(settings.value("AddressBar",true).toBool());
     settings.endGroup();
+    settings.beginGroup("Advanced");
+
+    this->hdImgSize=settings.value("HDDImgMinimumSize",this->hdImgSize).toInt();
+    settings.endGroup();
 
 }
 
@@ -298,6 +298,10 @@ void MainWindow::saveSettings()
     settings.setValue("Col2",ui->twFileTree->columnWidth(2));
     settings.setValue("Col3",ui->twFileTree->columnWidth(3));
     settings.setValue("AddressBar",ui->tbAddressBar->isVisible());
+    settings.endGroup();
+
+    settings.beginGroup("Advanced");
+    settings.setValue("HDDImgMinimumSize",this->hdImgSize);
     settings.endGroup();
 
 
@@ -447,7 +451,7 @@ void MainWindow::enableUI(bool state)
     ui->actionCreate_Directory->setEnabled(state);
     ui->actionVolume_Serial->setEnabled(state);
     ui->actionAdd->setEnabled(state);
-    ui->actionAttributes->setEnabled(state);
+    //ui->actionAttributes->setEnabled(state);
     ui->actionAdd_Directories->setEnabled(state);
     ui->actionVolume->setEnabled(state);
     ui->actionWipe_free_space->setEnabled(state);
@@ -476,6 +480,7 @@ void MainWindow::enableUI(bool state)
     {
         ui->actionSave->setEnabled(0);
         ui->actionCreate_Directory->setEnabled(0);
+        ui->actionAttributes->setEnabled(0);
     }
 }
 
@@ -589,7 +594,7 @@ void MainWindow::visualize()
     {
         if (this->dirs[i].attrib.at(0)=='D')
         {
-            names.append(dirs[i].name);
+            names.append(dirs[i].name+"/");
         }
     }
     qSort(names.begin(),names.end());
@@ -607,6 +612,10 @@ void MainWindow::visualize()
     {
         if (names[i]=="")
             continue;
+
+        if (names[i].at(names[i].length()-1)=='/')
+            names[i]=names.at(i).left(names.at(i).length()-1); //trim slashes
+
         QStringList folders=names[i].split('/');
         QString pth="::/";
         for (int j=1;j<folders.count();j++)
@@ -903,7 +912,30 @@ int MainWindow::loadFile(QString fileName, ImageFile::HandleMode mode)
     this->currentFile=fileName;
     //Mantle interface
     if (this->img) this->img->disposeFile();
-    this->img = new ImageFile(fileName,mode);
+
+    //hdd image opening
+    if (QFile(fileName).size()>this->hdImgSize)
+    {
+        HardDiskOpen * hd = new HardDiskOpen(this,fileName);
+        hd->exec();
+        if(hd->getOffset()==-1)
+        {
+            ui->twFileTree->clear();
+            ui->twDirTree->clear();
+            this->leAddress->setText("::/");
+            this->leLabel->clear();
+            this->setWindowTitle("LinImaMT");
+            if (this->img)
+                this->img->finishProcedure();
+            ui->statusBar->showMessage("");
+            return 0;
+        }
+        this->img = new ImageFile(fileName,hd->getMode(),hd->getOffset()); //open partition
+    }
+    else
+    {
+        this->img = new ImageFile(fileName,mode);
+    }
     ui->twFileTree->setImageFile(this->img);
     this->dirs=this->img->getContents("::/");
     if ((this->img->getFreeSpace()==0)&&(this->img->getUsedSpace()==0)&&(this->img->getSerial()==""))
@@ -913,7 +945,9 @@ int MainWindow::loadFile(QString fileName, ImageFile::HandleMode mode)
         this->leAddress->setText("::/");
         this->leLabel->clear();
         this->setWindowTitle("LinImaMT");
-        this->img->finishProcedure();
+        if (this->img)
+            this->img->finishProcedure();
+        ui->statusBar->showMessage("Could not load image. Maybe bad offset?");
         return 0;
     }
     //Visualize directories
@@ -943,7 +977,7 @@ void MainWindow::on_actionSave_As_triggered()
         //Reopen file
         ImageFile::HandleMode currentMode=this->img->getHandleMode();
         int imasize=this->img->getFreeSpace()+this->img->getUsedSpace();
-        if ((currentMode==ImageFile::ReadOnly)&&(imasize<3145728)) //Read only -> Default
+        if ((currentMode==ImageFile::ReadOnly)&&(imasize<this->hdImgSize)) //Read only -> Default
         {
             //reopen the file in ordinary mode
             this->loadFile(fname,ImageFile::DefaultMode);
@@ -1015,6 +1049,14 @@ void MainWindow::on_actionCreate_Directory_triggered()
         //show user some fancy thing
         QString destination = mkdirDialog->getText(this, "Create directory", "Folder name:", QLineEdit::Normal,
                                                "", &dialogResult);
+        if ((destination.contains('/'))||(destination.contains(':'))||(destination.contains('\\'))||(destination.contains('|'))||(destination==".")||(destination==".."))
+        {
+            QMessageBox::critical(this,"Error","Directory name should not contain characters: : / \\ | or be . or .. - directory not created");
+                this->statusBarNormal();
+                return;
+        }
+
+
         if ((destination.length()==0)||(!dialogResult))  //TODO: Filter all DOS-forbidden characters
         {
             this->statusBarNormal();
@@ -1030,6 +1072,7 @@ void MainWindow::on_actionCreate_Directory_triggered()
 
         destination=this->leAddress->text()+destination;
         this->img->makeFolder(destination);
+        this->img->finishProcedure();
 
         //refresh
         this->dirs=this->img->getContents("::/");
@@ -1330,7 +1373,7 @@ void MainWindow::on_actionVolume_triggered()
     {
         r=1;
     }
-    bootSector(this,this->img,0,512,r).exec();
+    bootSector(this,this->img,-1,512,r).exec();
 
     //refresh drive info
     this->dirs=this->img->getContents("::/");

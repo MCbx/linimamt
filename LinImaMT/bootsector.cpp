@@ -10,12 +10,15 @@
 //It allows to dump these 512 bytes into file or read another 512 bytes from file
 //and apply it to the image.
 
-bootSector::bootSector(QWidget *parent, ImageFile * image, int offset, int length, bool ReadOnly) :
+bootSector::bootSector(QWidget *parent, ImageFile * image, qint64 offset, int length, bool ReadOnly) :
     QDialog(parent),
     ui(new Ui::bootSector)
 {    
     this->image=image;
-    this->offset=offset;
+    if (offset==-1)
+        this->offset=image->getOffset();
+    else
+        this->offset=offset;
     this->length=length;
     ui->setupUi(this);
     this->modified=0;
