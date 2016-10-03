@@ -24,6 +24,7 @@
 //      TODO LIST      //
 // Drag-drop:
 //   - implementation of drop-extracting
+//double-click on a file should do something
 // Mess with metadata!
 
 //these need mounting to letters
