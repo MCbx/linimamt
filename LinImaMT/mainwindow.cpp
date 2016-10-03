@@ -1398,27 +1398,57 @@ void MainWindow::on_actionWipe_free_space_triggered()
     //1. Get free space from image
     uint freeSpace=this->img->getFreeSpace();
 
+    //If you do floppy disk erasing, it's OK. But imagine you have a 8GB HDD image. Temp dir dies quickly.
+
     //2. Prepare a zero-filled temp file with free space
     ui->statusBar->showMessage("Generating zero-file...");
     QApplication::processEvents();
     QTemporaryFile tmpF(QDir::temp().absoluteFilePath("$XXXXXXX.bin"));
-    //2. copy source image to temporary file
-    //this->tmpF->open();
-    tmpF.open();
-    tmpF.write(QByteArray(freeSpace,0));
-    tmpF.close();
+    QTemporaryFile tmpD(QDir::temp().absoluteFilePath("$$XXXXXX.bin"));
+    uint sizeThreshold=134217728; //must be multiply of 1024 (cluster requirements).
+    //uint sizeThreshold=153600;
+    if (freeSpace>sizeThreshold)
+    {
+        tmpF.open();
+        tmpF.write(QByteArray(sizeThreshold,0));
+        tmpF.close();
+        tmpD.open();
+        tmpD.write(QByteArray(freeSpace%sizeThreshold,0));
+        tmpD.close();
+    }
+    else
+    {
+        tmpF.open();
+        tmpF.write(QByteArray(freeSpace,0));
+        tmpF.close();
+    }
 
     //3. Copy the file to image
     ui->statusBar->showMessage("Copying to image...");
     QApplication::processEvents();
-    this->img->copyFile(tmpF.fileName(),"::/$$$wipe.bin");
+    for (uint i=0;i<freeSpace/sizeThreshold;i++)
+    {
+        this->img->copyFile(tmpF.fileName(),"::/$$wip"+QString::number(i)+".bin");
+    }
+    if (freeSpace>sizeThreshold)
+    {
+        this->img->copyFile(tmpD.fileName(),"::/$$wipf.bin");
+    }
+    else
+    {
+        this->img->copyFile(tmpF.fileName(),"::/$$wipf.bin");
+    }
 
     //4. Remove the file from image
     ui->statusBar->showMessage("Removing from image...");
     QApplication::processEvents();
-    this->img->deleteFile("::/$$$wipe.bin");
+    this->img->deleteFile("::/$$wip*.bin");
 
     tmpF.remove();
+    if (freeSpace>sizeThreshold)
+    {
+        tmpD.remove();
+    }
 
     this->dirs=this->img->getContents("::/"); //update structure too to notify about possible failure of file deletion
     this->visualize();
