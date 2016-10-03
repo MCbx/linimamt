@@ -483,6 +483,11 @@ void MainWindow::enableUI(bool state)
         ui->actionCreate_Directory->setEnabled(0);
         ui->actionAttributes->setEnabled(0);
     }
+    ui->actionMBR->setEnabled(0);
+    if (this->img->getOffset()>0)   //only for partitions
+    {
+        ui->actionMBR->setEnabled(state);
+    }
 }
 
 //helper function to check file existence and ask for overwriting.
@@ -1472,5 +1477,21 @@ void MainWindow::on_actionRun_TestDisk_on_image_triggered()
     QProcess::startDetached(testDiskPath,par,fileDlg.selectedFiles()[0]);
 }
 
+void MainWindow::on_actionMBR_triggered()
+{
+    bool r=0;
+    if (this->img->getHandleMode()==ImageFile::ReadOnly)
+    {
+        r=1;
+    }
+    bootSector(this,this->img,0,512,r).exec();
+
+    //refresh drive info
+    this->dirs=this->img->getContents("::/");
+    this->visualize();
+    this->visualizeModified();
+}
+
 
 #define FOLDINGEND }
+

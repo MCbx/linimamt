@@ -180,6 +180,7 @@
     <addaction name="actionVolume"/>
     <addaction name="actionWipe_free_space"/>
     <addaction name="actionRun_TestDisk_on_image"/>
+    <addaction name="actionMBR"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -459,6 +460,14 @@
    </property>
    <property name="toolTip">
     <string>Run TestDisk on image to e.g. recover deleted files.</string>
+   </property>
+  </action>
+  <action name="actionMBR">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>MBR...</string>
    </property>
   </action>
  </widget>
