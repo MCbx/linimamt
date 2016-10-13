@@ -33,16 +33,15 @@ Which means: Now working, and probably has to be fixed on some edge cases:
 * Deleting
 * Setting attributes
 * Editing and transplanting boot sectors
-
+* Hard disk image support for e.g. BOCHS ones with partition selection.
+* "Run Testdisk on image" 
 
 Todo
 =========
 Most important things to do:
  * Drag-drop should work better
- * Maybe messing with metadata
- * Hard disk image support, at least partial.
  * Image formats conversion, defragmenting
- * More analysis functions could be nice, like running Testdisk on it to recover files
+ * Maybe messing with metadata
  * Refactoring code. This window class with everything thrown into it doesn't look good.
  * Do something with directory structure visualization code as it's quite bad now.
  * Change the name to something which can be pronounced (after I've made HGCFEU and FTDU it should be more English in name). The current name is directly taken from "Linux", "Image" and "Mtools".
