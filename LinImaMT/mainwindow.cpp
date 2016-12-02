@@ -15,6 +15,8 @@
 #include "errordialog.h"
 #include <QFileInfo>
 #include <QSettings>
+#include <QTemporaryDir>
+#include <QDesktopServices>
 #include "attribute.h"
 #include "newimage.h"
 #include "bootsector.h"
@@ -25,7 +27,6 @@
 //      TODO LIST      //
 // Drag-drop:
 //   - implementation of drop-extracting
-//double-click on a file should do something
 // Mess with metadata!
 
 //these need mounting to letters
@@ -741,10 +742,36 @@ void MainWindow::on_twFileTree_itemDoubleClicked(QTreeWidgetItem *item)
         myItem->setSelected(1);
         ui->twDirTree->setCurrentItem(myItem);
         this->on_twDirTree_currentItemChanged(myItem);
-
+        return;
     }
 
-        //TODO: File double-click
+    //File double-click
+    //1. Extract file
+    QString fileName=item->text(4);
+    QTemporaryDir dir;
+    dir.setAutoRemove(0);
+    if (!dir.isValid()) {
+       QMessageBox::critical(this,"Problem","There was a problem creating temporaty directory.\nPlease try to extract the file manually and view it.");
+       return;
+    }
+    this->img->copyFile(fileName,dir.path()+"/"+item->text(0));
+    this->img->forceModified(0);
+    fileName=dir.path()+"/"+item->text(0);
+
+    //2. Open the file in default application
+    //QDesktopServices::openUrl(QUrl(fileName));
+
+
+    //2. Create viewer
+   QString settingsPath = "imarc.ini";
+    #ifndef Q_OS_WIN32
+        settingsPath = QDir::homePath()+"/.imarc.ini";
+    #endif
+
+    fileViewer * fv = new fileViewer(fileName,settingsPath,item->text(0));
+    //3. Launch viewer
+    fv->exec();
+    dir.setAutoRemove(1);
 }
 
 //if we changed selection, refresh status bar.
@@ -1065,7 +1092,7 @@ void MainWindow::on_actionCreate_Directory_triggered()
         }
 
 
-        if ((destination.length()==0)||(!dialogResult))  //TODO: Filter all DOS-forbidden characters
+        if ((destination.length()==0)||(!dialogResult))
         {
             this->statusBarNormal();
             return;
@@ -1144,6 +1171,7 @@ void MainWindow::on_actionExtract_selected_triggered()
          ui->statusBar->showMessage("Extracting "+ui->twFileTree->selectedItems().at(i)->text(0)+" ("+QString::number(i)+"/"+QString::number(ui->twFileTree->selectedItems().count())+")");
          QApplication::processEvents();
          this->img->copyFile(fileName,dir);
+         this->img->forceModified(0);
     }
 
 
