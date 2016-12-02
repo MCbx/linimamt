@@ -19,6 +19,7 @@
 #include "newimage.h"
 #include "bootsector.h"
 #include "harddiskopen.h"
+#include "fileviewer.h"
 
 //////// MEMENTO ////////
 //      TODO LIST      //
