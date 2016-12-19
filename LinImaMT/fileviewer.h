@@ -34,6 +34,8 @@ private:
     QByteArray data;
     QString name;
     QString configu;
+    QString path;
+    QList <QString> programs;
 };
 
 #endif // FILEVIEWER_H

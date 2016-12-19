@@ -2,12 +2,14 @@
 #include "ui_fileviewer.h"
 #include <QSettings>
 #include <QFileDialog>
+#include <QProcess>
 
 fileViewer::fileViewer(QString source, QString settingsPath, QString fileName, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::fileViewer)
 {
     this->name=fileName;
+    this->path=source;
     this->configu=settingsPath;
 
     ui->setupUi(this);
@@ -26,6 +28,15 @@ fileViewer::fileViewer(QString source, QString settingsPath, QString fileName, Q
     int indx = settings.value("DType",0).toInt();
     ui->cbDispType->setCurrentIndex(indx);
 
+    for (int i=0;i<10;i++)
+    {
+        QString prog=settings.value("Recent"+QString::number(i),"").toString();
+        this->programs.append(prog);
+        if (this->programs.at(i)!="")
+        {
+            ui->cbPrograms->addItem(this->programs.at(i));
+        }
+    }
     settings.endGroup();
 
 
@@ -67,10 +78,44 @@ void fileViewer::on_cbDispType_currentIndexChanged(int index)
 
 void fileViewer::on_btnOpen_clicked()
 {
+    QString command=ui->cbPrograms->currentText();
     //Check validity of combo box
-    //If bad - fail.
-    //If ok - save CBox state
+    if (command=="")
+        return;
+
+    if (command.contains("%f"))
+        command=command.replace("%f",this->path);
+    else
+        command=command+" \""+this->path+"\"";
+
     //Fire the process up.
+    QProcess proc;
+    proc.startDetached(command);
+
+    int q=-1;
+    for (int i=0;i<this->programs.count();i++)
+    {
+        if (this->programs.at(i)==ui->cbPrograms->currentText())
+        {
+            q=i;
+        }
+    }
+    if (q>-1)
+        this->programs.removeAt(q);
+    else
+        this->programs.removeLast();
+
+    this->programs.push_front(ui->cbPrograms->currentText());
+    ui->cbPrograms->clear();
+    for (int i=0;i<10;i++)
+    {
+        if (this->programs.at(i)!="")
+        {
+            ui->cbPrograms->addItem(this->programs.at(i));
+        }
+    }
+
+    this->saveSettings();
 }
 
 void fileViewer::on_btnExport_clicked()
@@ -131,5 +176,15 @@ void fileViewer::saveSettings()
     settings.beginGroup("Viewer");
     settings.setValue("DType",ui->cbDispType->currentIndex());
     settings.setValue("Wrap",ui->cbWordWrap->isChecked());
+
+    for (int i=0;i<10;i++) //save last used programs
+    {
+       if (this->programs.count()<i)
+       {
+           break; //sanity check
+       }
+       settings.setValue("Recent"+QString::number(i),this->programs.at(i));
+    }
+
     settings.endGroup();
 }
