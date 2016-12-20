@@ -165,6 +165,7 @@
     <addaction name="actionRename"/>
     <addaction name="actionAttributes"/>
     <addaction name="separator"/>
+    <addaction name="actionVolume_label"/>
     <addaction name="actionVolume_Serial"/>
    </widget>
    <widget class="QMenu" name="menuDisk">
@@ -487,6 +488,11 @@
    </property>
    <property name="text">
     <string>Quick Preview</string>
+   </property>
+  </action>
+  <action name="actionVolume_label">
+   <property name="text">
+    <string>Volume label...</string>
    </property>
   </action>
  </widget>

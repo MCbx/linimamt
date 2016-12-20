@@ -53,6 +53,8 @@ private slots:
 
     void on_actionQuick_Preview_triggered();
 
+    void on_actionVolume_label_triggered();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;

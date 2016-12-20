@@ -101,7 +101,8 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     leLabel->setMaxLength(11);
     leLabel->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     leLabel->setEnabled(0);
-    connect(leLabel,SIGNAL(editingFinished()),this,SLOT(on_label_edit()));
+    leLabel->setReadOnly(1);
+   // connect(leLabel,SIGNAL(editingFinished()),this,SLOT(on_label_edit()));
 
     ui->twDirTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
@@ -997,12 +998,12 @@ void MainWindow::on_actionGoUp_triggered()
 //edit label
 void MainWindow::on_label_edit()
 {
-    this->leLabel->setText(this->leLabel->text().trimmed());
-    if (this->img->getLabel()!=this->leLabel->text())
-    {
-        this->img->setLabel(this->leLabel->text());
-        visualizeModified();
-    }
+//    this->leLabel->setText(this->leLabel->text().trimmed());
+//    if (this->img->getLabel()!=this->leLabel->text())
+//    {
+//        this->img->setLabel(this->leLabel->text());
+//        visualizeModified();
+//    }
 }
 
 //open file action
@@ -1246,6 +1247,31 @@ void MainWindow::on_actionVolume_Serial_triggered()
     this->img->setSerial(destination);
     this->visualizeModified();
     ui->statusBar->showMessage("Serial number has been changed");
+    return;
+}
+
+void MainWindow::on_actionVolume_label_triggered()
+{
+    bool dialogResult;
+    QInputDialog *labelDialog = new QInputDialog();
+
+    //show user some fancy thing
+    QString g=img->getLabel().trimmed();
+    QString destination = labelDialog->getText(this, "Volume label", "Volume label:", QLineEdit::Normal,
+                                           g, &dialogResult);
+    if ((!dialogResult)||(destination==img->getLabel()))
+    {
+        this->statusBarNormal();
+        return;
+    }
+    destination=destination.trimmed();
+    destination.truncate(11);
+
+    //Read Only is maintained in image.
+    this->img->setLabel(destination);
+    this->img->getContents("::/");
+    this->visualizeModified();
+    this->leLabel->setText(this->img->getLabel());
     return;
 }
 
