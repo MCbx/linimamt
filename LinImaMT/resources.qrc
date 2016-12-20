@@ -9,5 +9,6 @@
         <file>save.png</file>
         <file>up.png</file>
         <file>extract.png</file>
+        <file>view.png</file>
     </qresource>
 </RCC>

@@ -15,7 +15,7 @@ fileViewer::fileViewer(QString source, QString settingsPath, QString fileName, Q
     ui->setupUi(this);
 
     //1. Read and apply configuration
-    QSettings settings(settingsPath,QSettings::IniFormat);
+    QSettings settings(this->configu,QSettings::IniFormat);
     settings.beginGroup("Viewer");
 
     ui->cbWordWrap->setChecked(settings.value("Wrap",1).toBool());
@@ -41,16 +41,17 @@ fileViewer::fileViewer(QString source, QString settingsPath, QString fileName, Q
 
 
     //2. Read file.
-    QFile plik(source);
+    QFile plik(this->path);
     if (!plik.open(QIODevice::ReadOnly))
     {
+        ui->textContents->appendHtml("<font color=#FF0000 size=5><b>ERROR OPENING FILE</b></font>");
         return;
     }
     this->data = plik.readAll();
     plik.close();
 
     //3. Show titlebar text
-    this->setWindowTitle(fileName+" - Preview");
+    this->setWindowTitle(this->name+" - Preview");
 
     //4. Show file
     this->showFile();

@@ -368,6 +368,7 @@ void MainWindow::statusBarNormal()
    {
         int i;
         ui->actionRename->setEnabled(0);
+        ui->actionQuick_Preview->setEnabled(0);
         ui->actionExtract_selected->setEnabled(1);
         ui->actionDelete_selected->setEnabled(1);
         ui->actionAttributes->setEnabled(1);
@@ -392,6 +393,7 @@ void MainWindow::statusBarNormal()
    if (ui->twFileTree->selectedItems().count()==1)
    {
        ui->actionRename->setEnabled(1);
+       ui->actionQuick_Preview->setEnabled(1);
        ui->actionAttributes->setEnabled(1);
        ui->actionExtract_selected->setEnabled(1);
    }
@@ -399,6 +401,7 @@ void MainWindow::statusBarNormal()
    {
        ui->actionAttributes->setEnabled(0);
        ui->actionRename->setEnabled(0);
+       ui->actionQuick_Preview->setEnabled(0);
        ui->actionExtract_selected->setEnabled(0);
        ui->actionDelete_selected->setEnabled(0);
    }
@@ -408,6 +411,7 @@ void MainWindow::statusBarNormal()
    {
        ui->actionAttributes->setEnabled(0);
        ui->actionRename->setEnabled(0);
+       ui->actionQuick_Preview->setEnabled(1);
        ui->actionDelete_selected->setEnabled(0);
    }
 }
@@ -966,6 +970,7 @@ void MainWindow::on_twFileTree_customContextMenuRequested(const QPoint &pos)
     menu.addAction(ui->actionAdd);
     menu.addAction(ui->actionAdd_Directories);
     menu.addSeparator();
+    menu.addAction(ui->actionQuick_Preview);
     menu.addAction(ui->actionCreate_Directory);
     menu.addAction(ui->actionRename);
     menu.addAction(ui->actionDelete_selected);
@@ -1613,6 +1618,30 @@ void MainWindow::on_actionMBR_triggered()
     this->visualizeModified();
 }
 
+void MainWindow::on_actionQuick_Preview_triggered()
+{
+    if (ui->twFileTree->currentItem()->text(2).at(0)=='D')
+        return; //check if it's not a directory
+
+    QString fileName=ui->twFileTree->currentItem()->text(4);
+    QTemporaryDir dir;
+    dir.setAutoRemove(0);
+    if (!dir.isValid()) {
+       QMessageBox::critical(this,"Problem","There was a problem creating temporaty directory.\nPlease try to extract the file manually and view it.");
+       return;
+    }
+    this->img->copyFile(fileName,dir.path()+"/"+ui->twFileTree->currentItem()->text(0));
+    this->img->forceModified(0);
+    fileName=dir.path()+"/"+ui->twFileTree->currentItem()->text(0);
+    QString settingsPath = "imarc.ini";
+    #ifndef Q_OS_WIN32
+        settingsPath = QDir::homePath()+"/.imarc.ini";
+    #endif
+    fileViewer * fv = new fileViewer(fileName,settingsPath,ui->twFileTree->currentItem()->text(0));
+    fv->exec();
+    dir.setAutoRemove(1); //we can safely remove directory
+    return;
+}
 
 #define FOLDINGEND }
 

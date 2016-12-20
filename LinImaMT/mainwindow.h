@@ -51,6 +51,8 @@ private slots:
 
     void on_actionOptions_triggered();
 
+    void on_actionQuick_Preview_triggered();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;
