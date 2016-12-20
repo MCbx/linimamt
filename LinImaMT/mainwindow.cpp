@@ -22,6 +22,7 @@
 #include "bootsector.h"
 #include "harddiskopen.h"
 #include "fileviewer.h"
+#include "optionsdialog.h"
 
 //////// MEMENTO ////////
 //      TODO LIST      //
@@ -276,8 +277,21 @@ void MainWindow::loadSettings()
     ui->actionAddress_bar->setChecked(settings.value("AddressBar",true).toBool());
     settings.endGroup();
     settings.beginGroup("Advanced");
-
     this->hdImgSize=settings.value("HDDImgMinimumSize",this->hdImgSize).toInt();
+    settings.endGroup();
+
+    settings.beginGroup("Viewing");
+    this->defaultViewer=settings.value("DefaultViewer","0").toString();
+    int k=settings.value("programsCount",0).toInt();
+    this->viewers.clear();
+    this->extensions.clear();
+    for (int i=0;i<k;i++)
+    {
+        QString a=settings.value("Extension"+QString::number(i),"").toString();
+        this->extensions.append(a);
+        a=settings.value("Program"+QString::number(i),"").toString();
+        this->viewers.append(a);
+    }
     settings.endGroup();
 
 }
@@ -308,7 +322,22 @@ void MainWindow::saveSettings()
     settings.setValue("HDDImgMinimumSize",this->hdImgSize);
     settings.endGroup();
 
+    settings.remove("Viewing"); //because user may delete sth, remove a whole group before writing it back
 
+    settings.beginGroup("Viewing");
+    settings.setValue("DefaultViewer",this->defaultViewer);
+    if (this->extensions.count()!=this->viewers.count())
+    {
+        settings.endGroup();       //error condition
+        return;
+    }
+    settings.setValue("programsCount",this->extensions.count());
+    for (int i=0;i<this->extensions.count();i++)
+    {
+       settings.setValue("Extension"+QString::number(i),this->extensions.at(i));
+       settings.setValue("Program"+QString::number(i),this->viewers.at(i));
+    }
+    settings.endGroup();
 }
 
 //makes number in decimal byte form e.g. 1 457 664 instead of 1457664
@@ -391,6 +420,11 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::closeEvent(QCloseEvent *clsEv)
 {
+    for (int i=0;i<this->deletion.count();i++) //temporary files cleanup
+    {
+        QDir d(this->deletion.at(i));
+        d.removeRecursively();
+    }
     if ((this->img!=NULL)&&(this->img->getModified()))
     {
         int k=askForSave();
@@ -546,6 +580,15 @@ char MainWindow::askForReplacement(bool &skipAll, bool &overwriteAll, QString fr
     }
     return replaceMode;
 }
+
+//Fire the options dialog
+void MainWindow::on_actionOptions_triggered()
+{
+    optionsDialog * n = new optionsDialog(&this->hdImgSize, &this->defaultViewer, &this->extensions, &this->viewers, this);
+    n->exec();
+    this->saveSettings();
+}
+
 
 #define FOLDINGEND }
 
@@ -758,20 +801,68 @@ void MainWindow::on_twFileTree_itemDoubleClicked(QTreeWidgetItem *item)
     this->img->forceModified(0);
     fileName=dir.path()+"/"+item->text(0);
 
-    //2. Open the file in default application
-    //QDesktopServices::openUrl(QUrl(fileName));
+    //scan for extensions
+    QString currentExtension=item->text(0).split(".").last();
+    currentExtension=currentExtension.toUpper();
+    QString command=this->defaultViewer;     //default - default viewer configured
+    for (int i=0;i<this->extensions.count();i++) //iterate over extensions
+    {
+        QString exts=this->extensions.at(i).toUpper();
+        QStringList a=exts.split("|");
+        for (int j=0;j<a.count();j++)
+        {
+            if (a.at(j)==currentExtension) //we hit an extension
+            {
+                if (i>this->viewers.count()-1)
+                    break;
+
+                command=this->viewers.at(i);
+                break;
+            }
+        }
+        if (command!=this->defaultViewer)
+            break;
+    }
 
 
-    //2. Create viewer
-   QString settingsPath = "imarc.ini";
-    #ifndef Q_OS_WIN32
-        settingsPath = QDir::homePath()+"/.imarc.ini";
-    #endif
+    if (command==this->defaultViewer)
+    {
+        if (this->defaultViewer=="0")
+        {
+            //2. Open the file in default application
+            QDesktopServices::openUrl(QUrl(fileName));
+            this->deletion.append(dir.path());
+            return;
+        }
+        if (this->defaultViewer=="1")
+        {
+            //2. Create viewer
+            QString settingsPath = "imarc.ini";
+            #ifndef Q_OS_WIN32
+                settingsPath = QDir::homePath()+"/.imarc.ini";
+            #endif
 
-    fileViewer * fv = new fileViewer(fileName,settingsPath,item->text(0));
-    //3. Launch viewer
-    fv->exec();
-    dir.setAutoRemove(1);
+            fileViewer * fv = new fileViewer(fileName,settingsPath,item->text(0));
+            //3. Launch viewer
+            fv->exec();
+            dir.setAutoRemove(1); //we can safely remove directory
+            return;
+        }
+    }
+
+    //we have some viewer configured
+    if ((command=="")||(command.length()==1))
+        return;
+
+    if (command.contains("%f"))
+        command=command.replace("%f",fileName);
+    else
+        command=command+" \""+fileName+"\"";
+
+    //Fire the process up.
+    QProcess proc;
+    proc.startDetached(command);
+
 }
 
 //if we changed selection, refresh status bar.

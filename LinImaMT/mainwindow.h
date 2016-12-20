@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QProcess>
 #include <QTreeWidgetItem>
+#include <QTemporaryDir>
 #include "imagefile.h"
 
 namespace Ui {
@@ -48,11 +49,18 @@ private slots:
 
     void on_actionMBR_triggered();
 
+    void on_actionOptions_triggered();
+
 private:
     Ui::MainWindow *ui;
     QProcess *process;
     QString currentFile;
     ImageFile * img;
+
+    QString defaultViewer;
+    QList <QString> viewers;
+    QList <QString> extensions;
+    QList <QString> deletion; //used to specify temporary files which will be deleted on exit
 
     //structure
     QList<ImageFile::fileEntry>dirs;

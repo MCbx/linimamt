@@ -36,6 +36,9 @@
          <height>0</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Program to open file.&lt;br&gt; &lt;b&gt;%f&lt;/b&gt; is a file name, if not used it will be appended to the end.</string>
+       </property>
        <property name="editable">
         <bool>true</bool>
        </property>

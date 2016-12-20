@@ -181,6 +181,7 @@
     <addaction name="actionWipe_free_space"/>
     <addaction name="actionRun_TestDisk_on_image"/>
     <addaction name="actionMBR"/>
+    <addaction name="actionOptions"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -255,7 +256,7 @@
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/Resources/glyphs/new.png</normaloff>:/Resources/glyphs/new.png</iconset>
    </property>
    <property name="text">
@@ -267,7 +268,7 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/Resources/glyphs/open.png</normaloff>:/Resources/glyphs/open.png</iconset>
    </property>
    <property name="text">
@@ -290,7 +291,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/Resources/glyphs/up.png</normaloff>:/Resources/glyphs/up.png</iconset>
    </property>
    <property name="text">
@@ -332,7 +333,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/Resources/glyphs/save.png</normaloff>:/Resources/glyphs/save.png</iconset>
    </property>
    <property name="text">
@@ -388,7 +389,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/Resources/glyphs/extract.png</normaloff>:/Resources/glyphs/extract.png</iconset>
    </property>
    <property name="text">
@@ -411,7 +412,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/Resources/glyphs/add_file.png</normaloff>:/Resources/glyphs/add_file.png</iconset>
    </property>
    <property name="text">
@@ -423,7 +424,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/Resources/glyphs/add_folder.png</normaloff>:/Resources/glyphs/add_folder.png</iconset>
    </property>
    <property name="text">
@@ -470,6 +471,11 @@
     <string>MBR...</string>
    </property>
   </action>
+  <action name="actionOptions">
+   <property name="text">
+    <string>Options</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -484,8 +490,6 @@
    <header>idirtreewidget.h</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     newimage.cpp \
     bootsector.cpp \
     harddiskopen.cpp \
-    fileviewer.cpp
+    fileviewer.cpp \
+    optionsdialog.cpp
 
 HEADERS  += mainwindow.h \
     errordialog.h \
@@ -33,7 +34,8 @@ HEADERS  += mainwindow.h \
     newimage.h \
     bootsector.h \
     harddiskopen.h \
-    fileviewer.h
+    fileviewer.h \
+    optionsdialog.h
 
 FORMS    += mainwindow.ui \
     errordialog.ui \
@@ -41,7 +43,8 @@ FORMS    += mainwindow.ui \
     newimage.ui \
     bootsector.ui \
     harddiskopen.ui \
-    fileviewer.ui
+    fileviewer.ui \
+    optionsdialog.ui
 
 RESOURCES += \
     resources.qrc
