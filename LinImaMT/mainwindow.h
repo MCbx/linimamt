@@ -66,6 +66,10 @@ private:
     QList <QString> extensions;
     QList <QString> deletion; //used to specify temporary files which will be deleted on exit
 
+    //Paths to be saved.
+    QString FileOpenPath;   //Initialized to read from settings
+    QString FileExtractPath; //initialized to FileOpenPath
+
     //structure
     QList<ImageFile::fileEntry>dirs;
 

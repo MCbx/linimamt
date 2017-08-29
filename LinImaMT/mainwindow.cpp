@@ -279,6 +279,7 @@ void MainWindow::loadSettings()
     settings.endGroup();
     settings.beginGroup("Advanced");
     this->hdImgSize=settings.value("HDDImgMinimumSize",this->hdImgSize).toInt();
+    this->FileOpenPath=settings.value("FileOpenPath","").toString();
     settings.endGroup();
 
     settings.beginGroup("Viewing");
@@ -321,6 +322,7 @@ void MainWindow::saveSettings()
 
     settings.beginGroup("Advanced");
     settings.setValue("HDDImgMinimumSize",this->hdImgSize);
+    settings.setValue("FileOpenPath",this->FileOpenPath);
     settings.endGroup();
 
     settings.remove("Viewing"); //because user may delete sth, remove a whole group before writing it back
@@ -995,7 +997,7 @@ void MainWindow::on_actionGoUp_triggered()
 ///     IMAGE ACTIONS     ///
 /////////////////////////////
 #define FOLDINGSTART {
-//edit label
+//edit label. This may not be useful at all after making it more difficult to stop altering images.
 void MainWindow::on_label_edit()
 {
 //    this->leLabel->setText(this->leLabel->text().trimmed());
@@ -1021,14 +1023,13 @@ void MainWindow::on_actionOpen_triggered(ImageFile::HandleMode mode)
             ui->actionSave->trigger();
         }
     }
-    QString fname = QFileDialog::getOpenFileName(this,"Open Image","","Disk Images (*.ima *.dsk *.img);;All files (*)");
+    QString fname = QFileDialog::getOpenFileName(this,"Open Image",this->FileOpenPath,"Disk Images (*.ima *.dsk *.img);;All files (*)");
     if (fname!="")
     {
         ui->statusBar->showMessage("Loading file ...");
         QApplication::processEvents();
         this->loadFile(fname, mode);
         //we don't need to refresh status bar as it has been done with visualization
-
     }
 }
 
@@ -1064,7 +1065,7 @@ int MainWindow::loadFile(QString fileName, ImageFile::HandleMode mode)
         }
         this->img = new ImageFile(fileName,hd->getMode(),hd->getOffset()); //open partition
     }
-    else
+    else //fdd image opening
     {
         this->img = new ImageFile(fileName,mode);
     }
@@ -1089,13 +1090,22 @@ int MainWindow::loadFile(QString fileName, ImageFile::HandleMode mode)
         ui->twFileTree->setDragDropMode(QTreeWidget::DragDrop);
     this->enableUI(1);
     this->img->finishProcedure();
+
+    //insert directory to variable
+    QFileInfo aa(fileName);
+    this->FileOpenPath=aa.absoluteDir().absolutePath();
+    if (this->FileExtractPath=="")
+    {
+        this->FileExtractPath=this->FileOpenPath;
+    }
+
     return 0;
 }
 
 //Save file "as" is always accessible. Then the working file is changed to saved file.
 void MainWindow::on_actionSave_As_triggered()
 {
-    QString fname = QFileDialog::getSaveFileName(this,"Save Image as","","Disk Images (*.ima *.dsk *.img);;All files (*)");
+    QString fname = QFileDialog::getSaveFileName(this,"Save Image as",this->FileOpenPath,"Disk Images (*.ima *.dsk *.img);;All files (*)");
     if ((!fname.endsWith("img",Qt::CaseInsensitive))&&(!fname.endsWith("ima",Qt::CaseInsensitive))
             &&(!fname.endsWith("dsk",Qt::CaseInsensitive))&&(!fname.endsWith("raw",Qt::CaseInsensitive)))
         fname=fname+".img";
@@ -1279,7 +1289,7 @@ void MainWindow::on_actionVolume_label_triggered()
 void MainWindow::on_actionExtract_selected_triggered()
 {
     //propose user destination directory
-    QString dir = QFileDialog::getExistingDirectory(this, "Destination Directory", "", QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks);
+    QString dir = QFileDialog::getExistingDirectory(this, "Destination Directory", this->FileExtractPath, QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks);
     if (dir =="")
     {
         return;
@@ -1296,6 +1306,7 @@ void MainWindow::on_actionExtract_selected_triggered()
          this->img->forceModified(0);
     }
 
+    this->FileExtractPath=dir;
 
     //refresh
     this->dirs=this->img->getContents("::/");
