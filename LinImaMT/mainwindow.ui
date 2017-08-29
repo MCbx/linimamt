@@ -169,6 +169,9 @@
     <addaction name="actionVolume_Serial"/>
    </widget>
    <widget class="QMenu" name="menuDisk">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Disk</string>
     </property>

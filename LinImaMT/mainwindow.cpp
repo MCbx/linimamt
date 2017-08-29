@@ -111,6 +111,8 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     this->loadSettings();
 
     this->img=NULL;
+    setAcceptDrops(true);
+
     ui->twFileTree->setDragDropMode(QTreeWidget::NoDragDrop);
     ui->twDirTree->setDragDropMode(QTreeWidget::NoDragDrop);
 
@@ -146,6 +148,38 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     //START application
 }
 
+//pass input data
+void MainWindow::dragEnterEvent(QDragEnterEvent *e)
+{
+    if (e->mimeData()->hasUrls()) {
+        e->acceptProposedAction();
+    }
+}
+
+//file open when dropped on window outside of panels
+void MainWindow::dropEvent(QDropEvent *e)
+{
+    foreach (const QUrl &url, e->mimeData()->urls()) {
+        QString fileName = url.toLocalFile();
+
+        if ((this->img!=NULL)&&(this->img->getModified()))
+        {
+            int k=askForSave();
+            if (k==-1)
+            {
+                return;
+            }
+            if (k==1)
+            {
+                ui->actionSave->trigger();
+            }
+        }
+        ui->statusBar->showMessage("Loading file ...");
+        QApplication::processEvents();
+        this->loadFile(fileName, ImageFile::DefaultMode);
+        //we don't need to refresh status bar as it has been done with visualization
+    }
+}
 
 MainWindow::~MainWindow()
 {
