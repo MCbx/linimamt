@@ -36,6 +36,13 @@ Which means: Now working, and probably has to be fixed on some edge cases:
 * Hard disk image support for e.g. BOCHS ones with partition selection.
 * "Run Testdisk on image" 
 
+Parameters
+===============
+* -new - open new file window
+* [filename] - open file
+* [filename] -d - open file in direct mode
+* [filename] -r - open file in read-only mode
+
 Todo
 =========
 Most important things to do:
