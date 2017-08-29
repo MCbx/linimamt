@@ -116,7 +116,6 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     ui->twFileTree->setDragDropMode(QTreeWidget::NoDragDrop);
     ui->twDirTree->setDragDropMode(QTreeWidget::NoDragDrop);
 
-
     //PARSE PARAMETERS
     if (arguments.count()>=2)
     {
@@ -1716,3 +1715,8 @@ void MainWindow::on_actionQuick_Preview_triggered()
 
 #define FOLDINGEND }
 
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::about(this, "About", "LinIMAMT: Qt DOS floppy image management tool\n and GNU mtools GUI.\n 2017 MCbx, GNU GPL.");
+}
