@@ -180,7 +180,7 @@ void fileViewer::saveSettings()
 
     for (int i=0;i<10;i++) //save last used programs
     {
-       if (this->programs.count()<i)
+       if ((this->programs.count()<i)||(this->programs.count()==0))
        {
            break; //sanity check
        }
