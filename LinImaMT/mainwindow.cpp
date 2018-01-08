@@ -527,7 +527,15 @@ void MainWindow::enableUI(bool state)
     this->leLabel->setEnabled(state);
     ui->actionSave_As->setEnabled(state);
     ui->actionCreate_Directory->setEnabled(state);
+
     ui->actionVolume_Serial->setEnabled(state);
+
+    if ((state==1)&&(this->img->getSerial()=="INVALID")) //invalid DOS disk, old pre-4.0 disk etc.
+    {
+            ui->actionVolume_Serial->setEnabled(0);
+    }
+
+
     ui->actionAdd->setEnabled(state);
     //ui->actionAttributes->setEnabled(state);
     ui->actionAdd_Directories->setEnabled(state);

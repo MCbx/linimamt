@@ -307,9 +307,13 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
         }
         tmp=lines[1];
         this->serial=tmp.mid(tmp.indexOf("is")+3);
+        if (tmp.indexOf("Serial")==-1)
+        {
+            this->serial="INVALID";
+        }
         //QMessageBox::critical(this,"result",this->label+"\n"+this->serial);
 
-        int lineCount=2;
+        int lineCount=1;
         QString myHome;
         while (lineCount<lines.count())
         {
