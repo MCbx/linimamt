@@ -182,9 +182,9 @@
     </property>
     <addaction name="actionAddress_bar"/>
     <addaction name="actionVolume"/>
+    <addaction name="actionMBR"/>
     <addaction name="actionWipe_free_space"/>
     <addaction name="actionRun_TestDisk_on_image"/>
-    <addaction name="actionMBR"/>
     <addaction name="actionOptions"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -330,7 +330,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Boot sector...</string>
+    <string>Boot sector of volume...</string>
    </property>
   </action>
   <action name="actionSave">
@@ -473,7 +473,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>MBR...</string>
+    <string>MBR of disk...</string>
    </property>
   </action>
   <action name="actionOptions">

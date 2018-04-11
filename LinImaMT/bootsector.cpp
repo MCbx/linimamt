@@ -10,7 +10,7 @@
 //It allows to dump these 512 bytes into file or read another 512 bytes from file
 //and apply it to the image.
 
-bootSector::bootSector(QWidget *parent, ImageFile * image, qint64 offset, int length, bool ReadOnly, QString caption) :
+bootSector::bootSector(QWidget *parent, ImageFile * image, qint64 offset, int length, bool ReadOnly, bool whistlesOff, QString caption) :
     QDialog(parent),
     ui(new Ui::bootSector)
 {    
@@ -29,6 +29,23 @@ bootSector::bootSector(QWidget *parent, ImageFile * image, qint64 offset, int le
     } else
     {
     this->setWindowTitle(caption);
+    }
+
+    //Viewing a MBR, not boot sector - turn off whistles.
+    if (whistlesOff)
+    {
+        ui->label->setEnabled(0);
+        ui->label_2->setEnabled(0);
+        ui->label_3->setEnabled(0);
+        ui->leBIOSEnds->setEnabled(0);
+        ui->leLabel->setEnabled(0);
+        ui->leOEMString->setEnabled(0);
+        ui->leSerial->setEnabled(0);
+        ui->cbPreserveBIOS->setEnabled(0);
+        ui->cbPreserveLabel->setEnabled(0);
+        ui->cbPreserveOEM->setEnabled(0);
+        ui->cbPreserveSerial->setEnabled(0);
+        ui->checkBox->setEnabled(0);
     }
 
     //1. Read first length bytes from img->getcurrentpath starting from offset into data array:
