@@ -51,208 +51,138 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
      <string>General</string>
     </attribute>
-    <widget class="QLabel" name="label_5">
+    <widget class="QWidget" name="">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>10</y>
-       <width>301</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Minimum size to be opened as HDD image:</string>
-     </property>
-    </widget>
-    <widget class="QSpinBox" name="sbHddSize">
-     <property name="geometry">
-      <rect>
-       <x>300</x>
        <y>5</y>
-       <width>101</width>
-       <height>23</height>
+       <width>378</width>
+       <height>25</height>
       </rect>
      </property>
-     <property name="maximum">
-      <number>104857600</number>
-     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Minimum size to be opened as HDD image:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="sbHddSize">
+        <property name="maximum">
+         <number>104857600</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">
      <string>Extensions</string>
     </attribute>
-    <widget class="QPushButton" name="btnAdd">
-     <property name="geometry">
-      <rect>
-       <x>440</x>
-       <y>410</y>
-       <width>81</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Add</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="btnRemove">
-     <property name="geometry">
-      <rect>
-       <x>530</x>
-       <y>410</y>
-       <width>81</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Remove</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>380</y>
-       <width>191</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>extensions (| - separated):</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>410</y>
-       <width>111</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Command:</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="leExtensioins">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>380</y>
-       <width>421</width>
-       <height>22</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="leCommand">
-     <property name="geometry">
-      <rect>
-       <x>120</x>
-       <y>410</y>
-       <width>311</width>
-       <height>22</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="rbInternal">
-     <property name="geometry">
-      <rect>
-       <x>30</x>
-       <y>30</y>
-       <width>151</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Internal viewer</string>
-     </property>
-     <attribute name="buttonGroup">
-      <string notr="true">buttonGroup</string>
-     </attribute>
-    </widget>
-    <widget class="QRadioButton" name="rbDefault">
-     <property name="geometry">
-      <rect>
-       <x>230</x>
-       <y>30</y>
-       <width>181</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Default OS program</string>
-     </property>
-     <attribute name="buttonGroup">
-      <string notr="true">buttonGroup</string>
-     </attribute>
-    </widget>
-    <widget class="QRadioButton" name="rbApplication">
-     <property name="geometry">
-      <rect>
-       <x>30</x>
-       <y>50</y>
-       <width>141</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Application:</string>
-     </property>
-     <attribute name="buttonGroup">
-      <string notr="true">buttonGroup</string>
-     </attribute>
-    </widget>
-    <widget class="QLineEdit" name="leApplication">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>50</y>
-       <width>391</width>
-       <height>22</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_3">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>80</y>
-       <width>211</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Extensions configuration: </string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_4">
+    <widget class="QWidget" name="">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>10</y>
-       <width>271</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Double-clicking file launches it in:</string>
-     </property>
-    </widget>
-    <widget class="QListWidget" name="lwExtensons">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>100</y>
        <width>601</width>
-       <height>271</height>
+       <height>431</height>
       </rect>
      </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0" colspan="4">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Double-clicking file launches it in:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QRadioButton" name="rbInternal">
+        <property name="text">
+         <string>Internal viewer</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup</string>
+        </attribute>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QRadioButton" name="rbDefault">
+        <property name="text">
+         <string>Default OS program</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup</string>
+        </attribute>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QRadioButton" name="rbApplication">
+        <property name="text">
+         <string>Application:</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup</string>
+        </attribute>
+       </widget>
+      </item>
+      <item row="2" column="2" colspan="4">
+       <widget class="QLineEdit" name="leApplication"/>
+      </item>
+      <item row="3" column="0" colspan="3">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Extensions configuration: </string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" colspan="6">
+       <widget class="QListWidget" name="lwExtensons"/>
+      </item>
+      <item row="5" column="0" colspan="2">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>extensions (| - separated):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2" colspan="4">
+       <widget class="QLineEdit" name="leExtensioins"/>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Command:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1" colspan="3">
+       <widget class="QLineEdit" name="leCommand"/>
+      </item>
+      <item row="6" column="4">
+       <widget class="QPushButton" name="btnAdd">
+        <property name="text">
+         <string>Add</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="5">
+       <widget class="QPushButton" name="btnRemove">
+        <property name="text">
+         <string>Remove</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </widget>
   </widget>

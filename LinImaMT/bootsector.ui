@@ -25,259 +25,175 @@
   <property name="windowTitle">
    <string>Boot sector properties</string>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
-   <property name="geometry">
-    <rect>
-     <x>290</x>
-     <y>464</y>
-     <width>291</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="leOEMString">
-   <property name="geometry">
-    <rect>
-     <x>150</x>
-     <y>7</y>
-     <width>161</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Courier</family>
-    </font>
-   </property>
-   <property name="maxLength">
-    <number>8</number>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="leSerial">
-   <property name="geometry">
-    <rect>
-     <x>150</x>
-     <y>35</y>
-     <width>161</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Courier</family>
-    </font>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="maxLength">
-    <number>8</number>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="leLabel">
-   <property name="geometry">
-    <rect>
-     <x>150</x>
-     <y>63</y>
-     <width>161</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Courier</family>
-    </font>
-   </property>
-   <property name="maxLength">
-    <number>11</number>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>141</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>OEM String:</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>39</y>
-     <width>141</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Volume serial:</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_3">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>67</y>
-     <width>141</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Boot volume label:</string>
-   </property>
-  </widget>
-  <widget class="QPlainTextEdit" name="teHexView">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>110</y>
      <width>581</width>
-     <height>351</height>
+     <height>481</height>
     </rect>
    </property>
-   <property name="font">
-    <font>
-     <family>Courier</family>
-    </font>
-   </property>
-   <property name="undoRedoEnabled">
-    <bool>false</bool>
-   </property>
-   <property name="readOnly">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>470</y>
-     <width>121</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Load from file</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_2">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>470</y>
-     <width>121</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Save to file</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="cbPreserveSerial">
-   <property name="geometry">
-    <rect>
-     <x>320</x>
-     <y>36</y>
-     <width>231</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Preserve when loading</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="cbPreserveLabel">
-   <property name="geometry">
-    <rect>
-     <x>320</x>
-     <y>64</y>
-     <width>221</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Preserve when loading</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="cbPreserveOEM">
-   <property name="geometry">
-    <rect>
-     <x>320</x>
-     <y>7</y>
-     <width>231</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Preserve when loading</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="cbPreserveBIOS">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>90</y>
-     <width>391</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Use to preserve disk geometry and root directory information when substituting boot block from drive with other geometry</string>
-   </property>
-   <property name="text">
-    <string>Preserve a whole BIOS block when loading, from 0x0B to</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="leBIOSEnds">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>400</x>
-     <y>88</y>
-     <width>51</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Courier</family>
-    </font>
-   </property>
-   <property name="toolTip">
-    <string notr="true"/>
-   </property>
-   <property name="maxLength">
-    <number>5</number>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="checkBox">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>455</x>
-     <y>88</y>
-     <width>141</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>0x1B (base BPB)</string>
-   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0" colspan="2">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>OEM String:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QLineEdit" name="leOEMString">
+      <property name="font">
+       <font>
+        <family>Courier</family>
+       </font>
+      </property>
+      <property name="maxLength">
+       <number>8</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="3" colspan="3">
+     <widget class="QCheckBox" name="cbPreserveOEM">
+      <property name="text">
+       <string>Preserve when loading</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="2">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Volume serial:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QLineEdit" name="leSerial">
+      <property name="font">
+       <font>
+        <family>Courier</family>
+       </font>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="maxLength">
+       <number>8</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3" colspan="3">
+     <widget class="QCheckBox" name="cbPreserveSerial">
+      <property name="text">
+       <string>Preserve when loading</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="2">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Boot volume label:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QLineEdit" name="leLabel">
+      <property name="font">
+       <font>
+        <family>Courier</family>
+       </font>
+      </property>
+      <property name="maxLength">
+       <number>11</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="3" colspan="3">
+     <widget class="QCheckBox" name="cbPreserveLabel">
+      <property name="text">
+       <string>Preserve when loading</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0" colspan="4">
+     <widget class="QCheckBox" name="cbPreserveBIOS">
+      <property name="toolTip">
+       <string>Use to preserve disk geometry and root directory information when substituting boot block from drive with other geometry</string>
+      </property>
+      <property name="text">
+       <string>Preserve a whole BIOS block when loading, from 0x0B to</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="4">
+     <widget class="QLineEdit" name="leBIOSEnds">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier</family>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string notr="true"/>
+      </property>
+      <property name="maxLength">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="5">
+     <widget class="QCheckBox" name="checkBox">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>0x1B (base BPB)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0" colspan="6">
+     <widget class="QPlainTextEdit" name="teHexView">
+      <property name="font">
+       <font>
+        <family>Courier</family>
+       </font>
+      </property>
+      <property name="undoRedoEnabled">
+       <bool>false</bool>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="text">
+       <string>Save to file</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <widget class="QPushButton" name="pushButton">
+      <property name="text">
+       <string>Load from file</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="5">
+     <widget class="QDialogButtonBox" name="buttonBox">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="standardButtons">
+       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

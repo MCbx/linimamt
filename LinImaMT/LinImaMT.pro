@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     bootsector.cpp \
     harddiskopen.cpp \
     fileviewer.cpp \
-    optionsdialog.cpp
+    optionsdialog.cpp \
+    mbrsector.cpp
 
 HEADERS  += mainwindow.h \
     errordialog.h \
@@ -35,7 +36,9 @@ HEADERS  += mainwindow.h \
     bootsector.h \
     harddiskopen.h \
     fileviewer.h \
-    optionsdialog.h
+    optionsdialog.h \
+    mbrsector.h \
+    hexspinbox.h
 
 FORMS    += mainwindow.ui \
     errordialog.ui \
@@ -44,7 +47,8 @@ FORMS    += mainwindow.ui \
     bootsector.ui \
     harddiskopen.ui \
     fileviewer.ui \
-    optionsdialog.ui
+    optionsdialog.ui \
+    mbrsector.ui
 
 RESOURCES += \
     resources.qrc
