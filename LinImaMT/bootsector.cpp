@@ -10,7 +10,7 @@
 //It allows to dump these 512 bytes into file or read another 512 bytes from file
 //and apply it to the image.
 
-bootSector::bootSector(QWidget *parent, ImageFile * image, qint64 offset, int length, bool ReadOnly) :
+bootSector::bootSector(QWidget *parent, ImageFile * image, qint64 offset, int length, bool ReadOnly, QString caption) :
     QDialog(parent),
     ui(new Ui::bootSector)
 {    
@@ -22,6 +22,14 @@ bootSector::bootSector(QWidget *parent, ImageFile * image, qint64 offset, int le
     this->length=length;
     ui->setupUi(this);
     this->modified=0;
+
+    if (caption=="")
+    {
+        this->setWindowTitle("Boot sector properties");
+    } else
+    {
+    this->setWindowTitle(caption);
+    }
 
     //1. Read first length bytes from img->getcurrentpath starting from offset into data array:
     QFile img(this->image->getCurrentPath());

@@ -1688,7 +1688,7 @@ void MainWindow::on_actionMBR_triggered()
     {
         r=1;
     }
-    bootSector(this,this->img,0,512,r).exec();
+    bootSector(this,this->img,0,512,r, "MBR Properties").exec();
 
     //refresh drive info
     this->dirs=this->img->getContents("::/");
