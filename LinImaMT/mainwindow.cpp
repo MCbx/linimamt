@@ -1728,5 +1728,5 @@ void MainWindow::on_actionQuick_Preview_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(this, "About", "LinIMAMT: Qt DOS floppy image management tool\n and GNU mtools GUI.\n 2017 MCbx, GNU GPL.");
+    QMessageBox::about(this, "About", "LinIMAMT: Qt DOS floppy image management tool\n and GNU mtools GUI.\n 2017-18 MCbx, GNU GPL.");
 }

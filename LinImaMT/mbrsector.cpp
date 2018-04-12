@@ -35,6 +35,7 @@ MBRSector::MBRSector(QWidget *parent, ImageFile * image, qint64 offset, int leng
         ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
     }
     this->refreshView();
+    this->modified=0;
 }
 
 MBRSector::~MBRSector()
@@ -164,11 +165,264 @@ void MBRSector::refreshView()
     str=QString::number((unsigned char)this->sectorData.at(510),16).rightJustified(2,'0')+" "+QString::number((unsigned char)this->sectorData.at(511),16).rightJustified(2,'0');
     ui->leSignature->setText(str);
     if (str.toUpper()!="55 AA")
+    {
         ui->leSignature->setStyleSheet("background-color:red;");
+        ui->leSignature->setToolTip("WARNING: Should be usually 55 AA");
+    }
     else
+    {
         ui->leSignature->setStyleSheet("background-color:none;");
-
+        ui->leSignature->setToolTip("");
+    }
 
     //4. Extract partition table
+
+    //PART1
+    ui->cbActive1->setTristate(0);
+    if ((unsigned char)this->sectorData.at(446)==0)
+    {
+        ui->cbActive1->setChecked(0);
+    }
+    if ((unsigned char)this->sectorData.at(446)==128)
+    {
+        ui->cbActive1->setChecked(1);
+    }
+    if (((unsigned char)this->sectorData.at(446)!=128) && ((unsigned char)this->sectorData.at(446)!=0))
+    {
+        ui->cbActive1->setTristate(1);
+        ui->cbActive1->setToolTip("0x"+QString::number((unsigned char)this->sectorData.at(446),16).rightJustified(2,'0'));
+    }
+    ui->sbStartH1->setValue((unsigned char)this->sectorData.at(447));
+
+    ui->sbStartS1->setValue((unsigned char)this->sectorData.at(448)%64);
+    ui->sbStartC1->setValue(((unsigned char)this->sectorData.at(448) - ((unsigned char)this->sectorData.at(448)%64))*4 + (unsigned char)this->sectorData.at(449) );
+
+    ui->sbType1->setValue((unsigned char)this->sectorData.at(450));
+
+    ui->sbEndH1->setValue((unsigned char)this->sectorData.at(451));
+
+    ui->sbEndS1->setValue((unsigned char)this->sectorData.at(452)%64);
+    ui->sbEndC1->setValue(((unsigned char)this->sectorData.at(452) - ((unsigned char)this->sectorData.at(452)%64))*4 + (unsigned char)this->sectorData.at(453) );
+
+    unsigned int aa = (unsigned int)((unsigned char)sectorData.at(457) << 24 | (unsigned char)sectorData.at(456) << 16 | (unsigned char)sectorData.at(455) << 8 | (unsigned char)sectorData.at(454));
+    ui->sbStartLBA1->setText(QString::number(aa));
+    aa = (unsigned int)((unsigned char)sectorData.at(461) << 24 | (unsigned char)sectorData.at(460) << 16 | (unsigned char)sectorData.at(459) << 8 | (unsigned char)sectorData.at(458));
+    ui->sbLength1->setText(QString::number(aa));
+
+    //PART2
+    ui->cbActive2->setTristate(0);
+    if ((unsigned char)this->sectorData.at(462)==0)
+    {
+        ui->cbActive2->setChecked(0);
+    }
+    if ((unsigned char)this->sectorData.at(462)==128)
+    {
+        ui->cbActive2->setChecked(1);
+    }
+    if (((unsigned char)this->sectorData.at(462)!=128) && ((unsigned char)this->sectorData.at(462)!=0))
+    {
+        ui->cbActive2->setTristate(1);
+        ui->cbActive2->setToolTip("0x"+QString::number((unsigned char)this->sectorData.at(462),16).rightJustified(2,'0'));
+    }
+    ui->sbStartH2->setValue((unsigned char)this->sectorData.at(463));
+
+    ui->sbStartS2->setValue((unsigned char)this->sectorData.at(464)%64);
+    ui->sbStartC2->setValue(((unsigned char)this->sectorData.at(464) - ((unsigned char)this->sectorData.at(464)%64))*4 + (unsigned char)this->sectorData.at(465) );
+
+    ui->sbType2->setValue((unsigned char)this->sectorData.at(466));
+
+    ui->sbEndH2->setValue((unsigned char)this->sectorData.at(467));
+
+    ui->sbEndS2->setValue((unsigned char)this->sectorData.at(468)%64);
+    ui->sbEndC2->setValue(((unsigned char)this->sectorData.at(468) - ((unsigned char)this->sectorData.at(468)%64))*4 + (unsigned char)this->sectorData.at(469) );
+
+    aa = (unsigned int)((unsigned char)sectorData.at(473) << 24 | (unsigned char)sectorData.at(472) << 16 | (unsigned char)sectorData.at(471) << 8 | (unsigned char)sectorData.at(470));
+    ui->sbStartLBA2->setText(QString::number(aa));
+    aa = (unsigned int)((unsigned char)sectorData.at(477) << 24 | (unsigned char)sectorData.at(476) << 16 | (unsigned char)sectorData.at(475) << 8 | (unsigned char)sectorData.at(474));
+    ui->sbLength2->setText(QString::number(aa));
+
+    //PART3
+    ui->cbActive3->setTristate(0);
+    if ((unsigned char)this->sectorData.at(478)==0)
+    {
+        ui->cbActive3->setChecked(0);
+    }
+    if ((unsigned char)this->sectorData.at(478)==128)
+    {
+        ui->cbActive3->setChecked(1);
+    }
+    if (((unsigned char)this->sectorData.at(478)!=128) && ((unsigned char)this->sectorData.at(478)!=0))
+    {
+        ui->cbActive3->setTristate(1);
+        ui->cbActive3->setToolTip("0x"+QString::number((unsigned char)this->sectorData.at(478),16).rightJustified(2,'0'));
+    }
+    ui->sbStartH3->setValue((unsigned char)this->sectorData.at(479));
+
+    ui->sbStartS3->setValue((unsigned char)this->sectorData.at(480)%64);
+    ui->sbStartC3->setValue(((unsigned char)this->sectorData.at(480) - ((unsigned char)this->sectorData.at(480)%64))*4 + (unsigned char)this->sectorData.at(481) );
+
+    ui->sbType3->setValue((unsigned char)this->sectorData.at(482));
+
+    ui->sbEndH3->setValue((unsigned char)this->sectorData.at(483));
+
+    ui->sbEndS3->setValue((unsigned char)this->sectorData.at(484)%64);
+    ui->sbEndC3->setValue(((unsigned char)this->sectorData.at(484) - ((unsigned char)this->sectorData.at(484)%64))*4 + (unsigned char)this->sectorData.at(485) );
+
+    aa = (unsigned int)((unsigned char)sectorData.at(489) << 24 | (unsigned char)sectorData.at(488) << 16 | (unsigned char)sectorData.at(487) << 8 | (unsigned char)sectorData.at(486));
+    ui->sbStartLBA3->setText(QString::number(aa));
+    aa = (unsigned int)((unsigned char)sectorData.at(493) << 24 | (unsigned char)sectorData.at(492) << 16 | (unsigned char)sectorData.at(491) << 8 | (unsigned char)sectorData.at(490));
+    ui->sbLength3->setText(QString::number(aa));
+
+    //PART4
+    ui->cbActive4->setTristate(0);
+    if ((unsigned char)this->sectorData.at(494)==0)
+    {
+        ui->cbActive4->setChecked(0);
+    }
+    if ((unsigned char)this->sectorData.at(494)==128)
+    {
+        ui->cbActive4->setChecked(1);
+    }
+    if (((unsigned char)this->sectorData.at(494)!=128) && ((unsigned char)this->sectorData.at(494)!=0))
+    {
+        ui->cbActive4->setTristate(1);
+        ui->cbActive4->setToolTip("0x"+QString::number((unsigned char)this->sectorData.at(494),16).rightJustified(2,'0'));
+    }
+    ui->sbStartH4->setValue((unsigned char)this->sectorData.at(495));
+
+    ui->sbStartS4->setValue((unsigned char)this->sectorData.at(496)%64);
+    ui->sbStartC4->setValue(((unsigned char)this->sectorData.at(496) - ((unsigned char)this->sectorData.at(496)%64))*4 + (unsigned char)this->sectorData.at(497) );
+
+    ui->sbType4->setValue((unsigned char)this->sectorData.at(498));
+
+    ui->sbEndH4->setValue((unsigned char)this->sectorData.at(499));
+
+    ui->sbEndS4->setValue((unsigned char)this->sectorData.at(500)%64);
+    ui->sbEndC4->setValue(((unsigned char)this->sectorData.at(500) - ((unsigned char)this->sectorData.at(500)%64))*4 + (unsigned char)this->sectorData.at(501) );
+
+    aa = (unsigned int)((unsigned char)sectorData.at(505) << 24 | (unsigned char)sectorData.at(504) << 16 | (unsigned char)sectorData.at(503) << 8 | (unsigned char)sectorData.at(502));
+    ui->sbStartLBA4->setText(QString::number(aa));
+    aa = (unsigned int)((unsigned char)sectorData.at(509) << 24 | (unsigned char)sectorData.at(508) << 16 | (unsigned char)sectorData.at(507) << 8 | (unsigned char)sectorData.at(506));
+    ui->sbLength4->setText(QString::number(aa));
 }
 
+
+void MBRSector::on_cbActive1_clicked()
+{
+    if (ui->cbActive1->isTristate())
+        ui->cbActive1->setTristate(0);
+    if (ui->cbActive1->isChecked())
+        this->sectorData[446]=128;
+    else
+        this->sectorData[446]=0;
+    this->modified=1;
+    this->refreshView();
+}
+
+void MBRSector::on_cbActive2_clicked()
+{
+    if (ui->cbActive2->isTristate())
+        ui->cbActive2->setTristate(0);
+    if (ui->cbActive2->isChecked())
+        this->sectorData[462]=128;
+    else
+        this->sectorData[462]=0;
+    this->modified=1;
+    this->refreshView();
+}
+
+void MBRSector::on_cbActive3_clicked()
+{
+    if (ui->cbActive3->isTristate())
+        ui->cbActive3->setTristate(0);
+    if (ui->cbActive3->isChecked())
+        this->sectorData[478]=128;
+    else
+        this->sectorData[478]=0;
+    this->modified=1;
+    this->refreshView();
+}
+
+void MBRSector::on_cbActive4_clicked()
+{
+    if (ui->cbActive4->isTristate())
+        ui->cbActive4->setTristate(0);
+    if (ui->cbActive4->isChecked())
+        this->sectorData[494]=128;
+    else
+        this->sectorData[494]=0;
+    this->modified=1;
+    this->refreshView();
+}
+
+void MBRSector::on_sbType1_valueChanged(int arg1)
+{
+    this->modified=1;
+    this->sectorData[450]=arg1;
+    this->refreshView();
+}
+
+void MBRSector::on_sbType2_valueChanged(int arg1)
+{
+    this->modified=1;
+    this->sectorData[466]=arg1;
+    this->refreshView();
+}
+
+void MBRSector::on_sbType3_valueChanged(int arg1)
+{
+    this->modified=1;
+    this->sectorData[482]=arg1;
+    this->refreshView();
+}
+
+void MBRSector::on_sbType4_valueChanged(int arg1)
+{
+    this->modified=1;
+    this->sectorData[498]=arg1;
+    this->refreshView();
+}
+
+void MBRSector::on_leSignature_editingFinished()
+{
+    this->modified=1;
+    QString a=ui->leSignature->text().mid(0,2);
+    unsigned char x = a.toInt(NULL,16);
+    this->sectorData[510]=x;
+    a=ui->leSignature->text().mid(3,2);
+    x = a.toInt(NULL,16);
+    this->sectorData[511]=x;
+    this->refreshView();
+}
+
+void MBRSector::on_buttonBox_accepted()
+{
+    if (this->modified==0)
+    {
+        return;
+    }
+
+    //ask QMessageBox to make sure that user knows what's doing
+    QMessageBox::StandardButton reply;
+     reply = QMessageBox::question(this, "WARNING!", "The sector has been modified. Do you REALLY want to save it?\n (and know what you are doing)",
+                                   QMessageBox::Yes|QMessageBox::No);
+     if (reply == QMessageBox::No)
+     {
+        return;
+     }
+
+    //save sector
+    this->image->prepareForModify();
+    //Now the image supplies us modified path to temp file.
+
+    //patch the image file with a new sector held in this->sectorData.
+    QFile plik(this->image->getCurrentPath());
+    if (!plik.open(QIODevice::ReadWrite))
+    {
+        QMessageBox::critical(this,"Error","Image data cannot be opened for writing!");
+    }
+    plik.seek(this->offset);
+    plik.write(this->sectorData);
+    plik.close();
+    this->image->forceModified(1);
+}

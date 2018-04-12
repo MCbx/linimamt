@@ -21,6 +21,26 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_cbActive1_clicked();
+
+    void on_cbActive2_clicked();
+
+    void on_cbActive3_clicked();
+
+    void on_cbActive4_clicked();
+
+    void on_sbType1_valueChanged(int arg1);
+
+    void on_sbType2_valueChanged(int arg1);
+
+    void on_sbType3_valueChanged(int arg1);
+
+    void on_sbType4_valueChanged(int arg1);
+
+    void on_leSignature_editingFinished();
+
+    void on_buttonBox_accepted();
+
 private:
     Ui::MBRSector *ui;
     void refreshView();

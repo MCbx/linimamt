@@ -10,10 +10,22 @@
     <height>531</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>693</width>
+    <height>531</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>MBR Editor</string>
   </property>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -34,6 +46,9 @@
       <property name="inputMask">
        <string>HH HH</string>
       </property>
+      <property name="readOnly">
+       <bool>false</bool>
+      </property>
      </widget>
     </item>
     <item row="0" column="2">
@@ -48,7 +63,7 @@
       <property name="title">
        <string>Partition entries</string>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -140,6 +155,9 @@
           <property name="text">
            <string/>
           </property>
+          <property name="tristate">
+           <bool>false</bool>
+          </property>
          </widget>
         </item>
         <item row="1" column="2">
@@ -151,6 +169,12 @@
         </item>
         <item row="1" column="3">
          <widget class="QSpinBox" name="sbStartC1">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>1023</number>
           </property>
@@ -158,6 +182,12 @@
         </item>
         <item row="1" column="4">
          <widget class="QSpinBox" name="sbStartH1">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>255</number>
           </property>
@@ -165,6 +195,12 @@
         </item>
         <item row="1" column="5">
          <widget class="QSpinBox" name="sbStartS1">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>63</number>
           </property>
@@ -182,6 +218,12 @@
         </item>
         <item row="1" column="7">
          <widget class="QSpinBox" name="sbEndC1">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>1023</number>
           </property>
@@ -189,6 +231,12 @@
         </item>
         <item row="1" column="8">
          <widget class="QSpinBox" name="sbEndH1">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>255</number>
           </property>
@@ -196,6 +244,12 @@
         </item>
         <item row="1" column="9">
          <widget class="QSpinBox" name="sbEndS1">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>63</number>
           </property>
@@ -206,12 +260,18 @@
           <property name="text">
            <string>4294222222</string>
           </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item row="1" column="11">
          <widget class="QLineEdit" name="sbLength1">
           <property name="text">
            <string>4294222222</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -227,6 +287,9 @@
           <property name="text">
            <string/>
           </property>
+          <property name="tristate">
+           <bool>false</bool>
+          </property>
          </widget>
         </item>
         <item row="2" column="2">
@@ -238,6 +301,12 @@
         </item>
         <item row="2" column="3">
          <widget class="QSpinBox" name="sbStartC2">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>1023</number>
           </property>
@@ -245,6 +314,12 @@
         </item>
         <item row="2" column="4">
          <widget class="QSpinBox" name="sbStartH2">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>255</number>
           </property>
@@ -252,6 +327,12 @@
         </item>
         <item row="2" column="5">
          <widget class="QSpinBox" name="sbStartS2">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>63</number>
           </property>
@@ -269,6 +350,12 @@
         </item>
         <item row="2" column="7">
          <widget class="QSpinBox" name="sbEndC2">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>1023</number>
           </property>
@@ -276,6 +363,12 @@
         </item>
         <item row="2" column="8">
          <widget class="QSpinBox" name="sbEndH2">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>255</number>
           </property>
@@ -283,6 +376,12 @@
         </item>
         <item row="2" column="9">
          <widget class="QSpinBox" name="sbEndS2">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>63</number>
           </property>
@@ -293,12 +392,18 @@
           <property name="text">
            <string>4294222222</string>
           </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item row="2" column="11">
          <widget class="QLineEdit" name="sbLength2">
           <property name="text">
            <string>4294222222</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -325,6 +430,12 @@
         </item>
         <item row="3" column="3">
          <widget class="QSpinBox" name="sbStartC3">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>1023</number>
           </property>
@@ -332,6 +443,12 @@
         </item>
         <item row="3" column="4">
          <widget class="QSpinBox" name="sbStartH3">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>255</number>
           </property>
@@ -339,6 +456,12 @@
         </item>
         <item row="3" column="5">
          <widget class="QSpinBox" name="sbStartS3">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>63</number>
           </property>
@@ -356,6 +479,12 @@
         </item>
         <item row="3" column="7">
          <widget class="QSpinBox" name="sbEndC3">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>1023</number>
           </property>
@@ -363,6 +492,12 @@
         </item>
         <item row="3" column="8">
          <widget class="QSpinBox" name="sbEndH3">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>255</number>
           </property>
@@ -370,6 +505,12 @@
         </item>
         <item row="3" column="9">
          <widget class="QSpinBox" name="sbEndS3">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>63</number>
           </property>
@@ -380,12 +521,18 @@
           <property name="text">
            <string>4294222222</string>
           </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item row="3" column="11">
          <widget class="QLineEdit" name="sbLength3">
           <property name="text">
            <string>4294222222</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -412,6 +559,12 @@
         </item>
         <item row="4" column="3">
          <widget class="QSpinBox" name="sbStartC4">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>1023</number>
           </property>
@@ -419,6 +572,12 @@
         </item>
         <item row="4" column="4">
          <widget class="QSpinBox" name="sbStartH4">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>255</number>
           </property>
@@ -426,6 +585,12 @@
         </item>
         <item row="4" column="5">
          <widget class="QSpinBox" name="sbStartS4">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>63</number>
           </property>
@@ -443,6 +608,12 @@
         </item>
         <item row="4" column="7">
          <widget class="QSpinBox" name="sbEndC4">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>1023</number>
           </property>
@@ -450,6 +621,12 @@
         </item>
         <item row="4" column="8">
          <widget class="QSpinBox" name="sbEndH4">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>255</number>
           </property>
@@ -457,6 +634,12 @@
         </item>
         <item row="4" column="9">
          <widget class="QSpinBox" name="sbEndS4">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="maximum">
            <number>63</number>
           </property>
@@ -467,12 +650,18 @@
           <property name="text">
            <string>4294222222</string>
           </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item row="4" column="11">
          <widget class="QLineEdit" name="sbLength4">
           <property name="text">
            <string>4294222222</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -501,6 +690,9 @@
       <property name="text">
        <string>00 00 00 00 00 00 00 00 00 00</string>
       </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
      </widget>
     </item>
     <item row="0" column="3">
@@ -510,6 +702,11 @@
         <horstretch>5</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <family>Monospace</family>
+       </font>
       </property>
       <property name="text">
        <string>TextLabel</string>
@@ -531,7 +728,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>14</x>
@@ -682,6 +879,60 @@
    <header>hexspinbox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>leIdentifier</tabstop>
+  <tabstop>leSignature</tabstop>
+  <tabstop>cbActive1</tabstop>
+  <tabstop>sbType1</tabstop>
+  <tabstop>sbStartC1</tabstop>
+  <tabstop>sbStartH1</tabstop>
+  <tabstop>sbStartS1</tabstop>
+  <tabstop>sbEndC1</tabstop>
+  <tabstop>sbEndH1</tabstop>
+  <tabstop>sbEndS1</tabstop>
+  <tabstop>sbStartLBA1</tabstop>
+  <tabstop>sbLength1</tabstop>
+  <tabstop>cbActive2</tabstop>
+  <tabstop>sbType2</tabstop>
+  <tabstop>sbStartC2</tabstop>
+  <tabstop>sbStartH2</tabstop>
+  <tabstop>sbStartS2</tabstop>
+  <tabstop>sbEndC2</tabstop>
+  <tabstop>sbEndH2</tabstop>
+  <tabstop>sbEndS2</tabstop>
+  <tabstop>sbStartLBA2</tabstop>
+  <tabstop>sbLength2</tabstop>
+  <tabstop>cbActive3</tabstop>
+  <tabstop>sbType3</tabstop>
+  <tabstop>sbStartC3</tabstop>
+  <tabstop>sbStartH3</tabstop>
+  <tabstop>sbStartS3</tabstop>
+  <tabstop>sbEndC3</tabstop>
+  <tabstop>sbEndH3</tabstop>
+  <tabstop>sbEndS3</tabstop>
+  <tabstop>sbStartLBA3</tabstop>
+  <tabstop>sbLength3</tabstop>
+  <tabstop>cbActive4</tabstop>
+  <tabstop>sbType4</tabstop>
+  <tabstop>sbStartC4</tabstop>
+  <tabstop>sbStartH4</tabstop>
+  <tabstop>sbStartS4</tabstop>
+  <tabstop>sbEndC4</tabstop>
+  <tabstop>sbEndH4</tabstop>
+  <tabstop>sbEndS4</tabstop>
+  <tabstop>sbStartLBA4</tabstop>
+  <tabstop>sbLength4</tabstop>
+  <tabstop>pushButton_2</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>cbPreserveCode</tabstop>
+  <tabstop>cbPreserveIdentifier</tabstop>
+  <tabstop>cbPreservePart1</tabstop>
+  <tabstop>cbPreservePart2</tabstop>
+  <tabstop>cbPreservePart3</tabstop>
+  <tabstop>cbPreservePart4</tabstop>
+  <tabstop>teHexView</tabstop>
+  <tabstop>cbPreserveSignature</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
