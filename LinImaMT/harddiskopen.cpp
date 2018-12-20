@@ -65,7 +65,7 @@ HardDiskOpen::HardDiskOpen(QWidget *parent, QString imageFile) :
         typ=log.at(i).split("size=").last().split(',').first().trimmed();
         k=k+typ;
         typ=log.at(i).split("start=").last().split(',').first().trimmed();
-        k=k+" Offset: "+QString::number(typ.toInt()*512);
+        k=k+" Offset: "+QString::number(typ.toInt()*512)+" B";
         ui->lwPartitions->addItem(k);
     }
 }
@@ -105,6 +105,7 @@ ImageFile::HandleMode HardDiskOpen::getMode()
 void HardDiskOpen::on_lwPartitions_currentRowChanged()
 {
     QString a=ui->lwPartitions->currentItem()->text();
+    a.replace(" B","");
     ui->sbOffset->setValue(a.split(' ').last().trimmed().toInt());
 }
 
