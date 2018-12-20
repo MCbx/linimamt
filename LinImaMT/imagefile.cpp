@@ -250,7 +250,7 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
 
         //When image is blank, mtools returns error. First, we will make a dumb try to read root directory.
         int status=this->execute("mdir","-a \""+home+"\"",op);
-        if (op.contains("Directory for ::/")&&op.contains("No files"))
+        if (op.contains("Directory for ::/")&&op.contains("\nNo files\n"))
         {
             //we are in this situation
             //the only thing we will get: Label, serial, bytes free. Nothing more.
