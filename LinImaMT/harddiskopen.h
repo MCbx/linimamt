@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <imagefile.h>
+#include <QListWidgetItem>
 
 namespace Ui {
 class HardDiskOpen;
@@ -24,6 +25,8 @@ private slots:
     void on_HardDiskOpen_accepted();
 
     void on_lwPartitions_currentRowChanged();
+
+    void on_lwPartitions_itemDoubleClicked(QListWidgetItem *item);
 
 private:
     Ui::HardDiskOpen *ui;

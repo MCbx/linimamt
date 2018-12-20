@@ -107,3 +107,8 @@ void HardDiskOpen::on_lwPartitions_currentRowChanged()
     QString a=ui->lwPartitions->currentItem()->text();
     ui->sbOffset->setValue(a.split(' ').last().trimmed().toInt());
 }
+
+void HardDiskOpen::on_lwPartitions_itemDoubleClicked(QListWidgetItem *item)
+{
+    this->accept();
+}
