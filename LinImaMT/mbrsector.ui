@@ -152,6 +152,9 @@
         </item>
         <item row="1" column="1">
          <widget class="QCheckBox" name="cbActive1">
+          <property name="toolTip">
+           <string>Active</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -284,6 +287,9 @@
         </item>
         <item row="2" column="1">
          <widget class="QCheckBox" name="cbActive2">
+          <property name="toolTip">
+           <string>Active</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -416,6 +422,9 @@
         </item>
         <item row="3" column="1">
          <widget class="QCheckBox" name="cbActive3">
+          <property name="toolTip">
+           <string>Active</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -545,6 +554,9 @@
         </item>
         <item row="4" column="1">
          <widget class="QCheckBox" name="cbActive4">
+          <property name="toolTip">
+           <string>Active</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -864,6 +876,9 @@
     </item>
     <item row="10" column="1">
      <widget class="QCheckBox" name="cbPreserveSignature">
+      <property name="toolTip">
+       <string>Preserve 1FE - 1FF</string>
+      </property>
       <property name="text">
        <string>Signature</string>
       </property>
