@@ -345,8 +345,8 @@ void MainWindow::saveSettings()
     settings.setValue("Width",MainWindow::width());
     settings.setValue("Height",MainWindow::height());
     QList<int> a=ui->splitter->sizes();
-    settings.setValue("Split",MainWindow::width()-ui->splitter->sizes().at(1));
-    settings.setValue("Split2",MainWindow::width()-ui->splitter->sizes().at(0));
+    settings.setValue("Split",MainWindow::width()-ui->splitter->sizes().at(1)-3);
+    settings.setValue("Split2",MainWindow::width()-ui->splitter->sizes().at(0)+3); //these -3/+3 are important for some reason.
     settings.setValue("Col0",ui->twFileTree->columnWidth(0));
     settings.setValue("Col1",ui->twFileTree->columnWidth(1));
     settings.setValue("Col2",ui->twFileTree->columnWidth(2));

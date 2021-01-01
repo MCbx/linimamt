@@ -2,6 +2,7 @@
 #include "ui_errordialog.h"
 #include <QGraphicsView>
 #include <QGraphicsRectItem>
+#include <QStyle>
 
 ErrorDialog::ErrorDialog(QWidget *parent, QString text, QString cons) :
     QDialog(parent),

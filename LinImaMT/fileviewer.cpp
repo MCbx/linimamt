@@ -18,6 +18,18 @@ fileViewer::fileViewer(QString source, QString settingsPath, QString fileName, Q
     QSettings settings(this->configu,QSettings::IniFormat);
     settings.beginGroup("Viewer");
 
+    //restore window dimensions from settings, the first thing we do
+    int k=settings.value("W",0).toInt();
+    if (k>0)
+    {
+        this->resize(k,this->height());
+    }
+    k=settings.value("H",0).toInt();
+    if (k>0)
+    {
+        this->resize(this->width(),k);
+    }
+
     ui->cbWordWrap->setChecked(settings.value("Wrap",1).toBool());
 
     if (ui->cbWordWrap->isChecked())
@@ -27,6 +39,8 @@ fileViewer::fileViewer(QString source, QString settingsPath, QString fileName, Q
 
     int indx = settings.value("DType",0).toInt();
     ui->cbDispType->setCurrentIndex(indx);
+
+
 
     for (int i=0;i<10;i++)
     {
@@ -177,7 +191,8 @@ void fileViewer::saveSettings()
     settings.beginGroup("Viewer");
     settings.setValue("DType",ui->cbDispType->currentIndex());
     settings.setValue("Wrap",ui->cbWordWrap->isChecked());
-
+    settings.setValue("W",this->width());
+    settings.setValue("H",this->height()); //remember width and height of viewer.
     for (int i=0;i<10;i++) //save last used programs
     {
        if ((this->programs.count()<i)||(this->programs.count()==0))
