@@ -652,13 +652,16 @@ void MainWindow::customSortByColumn(int column)
     ui->twFileTree->sortItems(column,order);
 
     //take directories and push them to the beginning
+    int q=0;
     for (int i=0;i<ui->twFileTree->topLevelItemCount();i++)
     {
         if (ui->twFileTree->topLevelItem(i)->text(2).at(0)=='D')
         {
             QTreeWidgetItem * item = ui->twFileTree->topLevelItem(i);
             ui->twFileTree->takeTopLevelItem(i);
-            ui->twFileTree->insertTopLevelItem(0,item);
+            ui->twFileTree->insertTopLevelItem(q,item);
+//            ui->twFileTree->insertTopLevelItem(0,item);
+            q++;
         }
     }
 
