@@ -28,7 +28,21 @@
    </property>
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="2" column="0" colspan="2">
+     <item row="0" column="0">
+      <widget class="QComboBox" name="cbDispType">
+       <item>
+        <property name="text">
+         <string>Text</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Hex</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="3" column="0" colspan="2">
       <widget class="QComboBox" name="cbPrograms">
        <property name="minimumSize">
         <size>
@@ -47,8 +61,40 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="4">
-      <widget class="QPushButton" name="btnExport">
+     <item row="3" column="3">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="3" column="5">
+      <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Close</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QPushButton" name="btnOpen">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -56,11 +102,11 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Export</string>
+        <string>Open</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="0" colspan="6">
+     <item row="2" column="0" colspan="6">
       <widget class="QPlainTextEdit" name="textContents">
        <property name="font">
         <font>
@@ -78,24 +124,8 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="5">
-      <widget class="QDialogButtonBox" name="buttonBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="standardButtons">
-        <set>QDialogButtonBox::Close</set>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QPushButton" name="btnOpen">
+     <item row="3" column="4">
+      <widget class="QPushButton" name="btnExport">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -103,46 +133,29 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Open</string>
+        <string>Export</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QComboBox" name="cbDispType">
-       <item>
-        <property name="text">
-         <string>Text</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Hex</string>
-        </property>
-       </item>
+     <item row="1" column="0" colspan="6">
+      <widget class="QLabel" name="lbType">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Filetype: unknown</string>
+       </property>
       </widget>
      </item>
-     <item row="0" column="2" colspan="3">
+     <item row="0" column="1">
       <widget class="QCheckBox" name="cbWordWrap">
        <property name="text">
         <string>Word wrap</string>
        </property>
       </widget>
-     </item>
-     <item row="2" column="3">
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>

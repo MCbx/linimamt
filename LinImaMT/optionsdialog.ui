@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>640</width>
-    <height>500</height>
+    <height>515</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>640</width>
-    <height>500</height>
+    <height>515</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>640</width>
-    <height>500</height>
+    <height>515</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -29,7 +29,7 @@
    <property name="geometry">
     <rect>
      <x>460</x>
-     <y>470</y>
+     <y>480</y>
      <width>161</width>
      <height>32</height>
     </rect>
@@ -47,7 +47,7 @@
      <x>10</x>
      <y>0</y>
      <width>621</width>
-     <height>471</height>
+     <height>481</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -57,13 +57,13 @@
     <attribute name="title">
      <string>General</string>
     </attribute>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>5</y>
-       <width>378</width>
-       <height>25</height>
+       <width>551</width>
+       <height>30</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
@@ -88,7 +88,7 @@
     <attribute name="title">
      <string>Extensions</string>
     </attribute>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>

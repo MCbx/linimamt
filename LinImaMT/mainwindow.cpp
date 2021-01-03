@@ -927,7 +927,7 @@ void MainWindow::on_twFileTree_itemSelectionChanged()
 //this executes if valid content is dropped in valid place.
 void MainWindow::on_fileDragDrop(QStringList from, QString to)
 {
-   // QMessageBox::critical(this,"Drag",from+" into "+to);
+//    QMessageBox::critical(this,"Drag",from.at(0)+" into "+to);
 
     //We have the following situations:
     //1. Inside image - we move files
@@ -1731,5 +1731,5 @@ void MainWindow::on_actionQuick_Preview_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(this, "About", "LinIMAMT: Qt DOS floppy image management tool\n and GNU mtools GUI.\n 2017-18 MCbx, GNU GPL.");
+    QMessageBox::about(this, "About", "LinIMAMT: Qt DOS floppy image management tool\n and GNU mtools GUI.\n 2017-21 MCbx, GNU GPL.");
 }

@@ -3,6 +3,7 @@
 #include <QSettings>
 #include <QFileDialog>
 #include <QProcess>
+#include <QSizePolicy>
 
 fileViewer::fileViewer(QString source, QString settingsPath, QString fileName, QWidget *parent) :
     QDialog(parent),
@@ -69,6 +70,18 @@ fileViewer::fileViewer(QString source, QString settingsPath, QString fileName, Q
 
     //4. Show file
     this->showFile();
+
+    //ui->lbType->setWordWrap(1);
+
+    //5. Fill the type
+    QProcess fileproc;
+    fileproc.setProgram("file");
+    fileproc.setArguments(QStringList(source));
+    fileproc.start();
+    fileproc.waitForFinished(1000);
+    QString w = fileproc.readAllStandardOutput();
+    w=w.trimmed();
+  ui->lbType->setText("Type"+w.mid(w.indexOf(":"),w.length()));
 }
 
 fileViewer::~fileViewer()

@@ -2,7 +2,8 @@
 #include "ui_bootsector.h"
 #include <QMessageBox>
 #include <QFileDialog>
-
+#include <QSize>
+#include <QStyle>
 
 //This is a completely separate subroutine
 //It must get from input a path to image.
@@ -52,6 +53,18 @@ bootSector::bootSector(QWidget *parent, ImageFile * image, qint64 offset, int le
         ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
     }
     this->refreshView();
+
+
+    QSize s = ui->teHexView->document()->size().toSize();
+    int addon=15+qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
+    this->setMinimumSize(s.width()+addon+15,this->height());
+    this->setMaximumSize(s.width()+addon+15,this->height());
+    this->resize(s.width()+addon+15,this->height());
+
+    int height1=310;
+    ui->teHexView->setMinimumSize(s.width()+addon,height1);
+    ui->teHexView->setMaximumSize(s.width()+addon,height1);
+    ui->teHexView->resize(s.width()+addon,height1);
 }
 
 bootSector::~bootSector()
