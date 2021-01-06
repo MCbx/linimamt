@@ -3,6 +3,7 @@
 #include <QGraphicsView>
 #include <QGraphicsRectItem>
 #include <QStyle>
+#include <QDebug>
 
 ErrorDialog::ErrorDialog(QWidget *parent, QString text, QString cons) :
     QDialog(parent),
@@ -21,6 +22,8 @@ ErrorDialog::ErrorDialog(QWidget *parent, QString text, QString cons) :
 //    ui->peConsole->setReadOnly(1);
     this->console=cons;
     this->text=text;
+//    qInfo()<<"Error window call\n";
+
 }
 
 void ErrorDialog::append(int code, QString text, QString console)

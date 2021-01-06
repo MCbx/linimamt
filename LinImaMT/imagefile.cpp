@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QTemporaryFile>
 #include <QDir>
+#include <QDebug>
 
 //open image
 ImageFile::ImageFile(QString imagePath, HandleMode a, qint64 offset)
@@ -129,9 +130,10 @@ int ImageFile::errorMessage(int code, QString text, QString console)
     }
     else
     {
-        this->procedureError=new ErrorDialog(0,"","");
+        this->procedureError=new ErrorDialog(nullptr,"","");
         this->procedureError->append(code,text,console);
     }
+    return 0; //THIS IS CRITICAL FOR COMMITTING AN ERROR!
 }
 
 //this function prepares file for modification, it does NOT set modified flag yet.
@@ -278,8 +280,8 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
             }
             return dirs;
         }
-
         status=this->execute("mdir","-/ -a \""+home+"\"",op);
+
         if (status!=0)
         {
             errorMessage(status,"Failed to acquire listing, code: "+QString::number(status),op);

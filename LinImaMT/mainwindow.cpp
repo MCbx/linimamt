@@ -17,6 +17,7 @@
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QDesktopServices>
+#include <QDebug>
 #include "attribute.h"
 #include "newimage.h"
 #include "bootsector.h"
@@ -139,6 +140,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
             ui->statusBar->showMessage("Loading file ...");
             QApplication::processEvents();
             this->loadFile(arguments[1],mode);
+
         } else
         {
             QMessageBox::information(0,"Problem","Parameter unknown and file does not exist: "+arguments[1]);

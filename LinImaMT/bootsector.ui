@@ -131,7 +131,7 @@
     <item row="3" column="0" colspan="4">
      <widget class="QCheckBox" name="cbPreserveBIOS">
       <property name="toolTip">
-       <string>Use to preserve disk geometry and root directory information when substituting boot block from drive with other geometry</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use to preserve disk geometry and root directory location information when substituting boot block from drive with other geometry.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Generally click it when you load sector from disk of different size.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
        <string>Preserve a whole BIOS block when loading, from 0x0B to</string>
