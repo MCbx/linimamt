@@ -568,8 +568,8 @@ void MainWindow::enableUI(bool state)
     if (this->img->getHandleMode()==ImageFile::DirectMode)
     {
         ui->actionSave->setEnabled(0);
-        ui->actionCreate_Directory->setEnabled(0);
-        ui->actionAttributes->setEnabled(0);
+       // ui->actionCreate_Directory->setEnabled(0); //bugfix
+      //  ui->actionAttributes->setEnabled(0);
     }
     ui->actionMBR->setEnabled(0);
     if (this->img->getOffset()>0)   //only for partitions
