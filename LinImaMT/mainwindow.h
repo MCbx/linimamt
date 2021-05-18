@@ -92,6 +92,8 @@ private:
     void enableUI(bool state);
     int askForSave();
     qint64 hdImgSize;
+    int sortColumn;      //for file sort load/save in config file.
+    Qt::SortOrder order; //this is for file sort load/save in config file
 
     char askForReplacement(bool &SkipAll, bool &overwriteAll, QString from, QString to);
 

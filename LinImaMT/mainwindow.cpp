@@ -312,6 +312,15 @@ void MainWindow::loadSettings()
 
     ui->tbAddressBar->setVisible(settings.value("AddressBar",true).toBool());
     ui->actionAddress_bar->setChecked(settings.value("AddressBar",true).toBool());
+
+    int sortingColumn=settings.value("sortColumn",0).toInt();  //file view sorting order - load from file
+    Qt::SortOrder sortingOrder=Qt::AscendingOrder;
+    if (settings.value("sortOrder",0).toInt()==1)
+    {
+        sortingOrder=Qt::DescendingOrder;
+    }
+    ui->twFileTree->sortByColumn(sortingColumn,sortingOrder);
+
     settings.endGroup();
     settings.beginGroup("Advanced");
     this->hdImgSize=settings.value("HDDImgMinimumSize",this->hdImgSize).toInt();
@@ -354,6 +363,15 @@ void MainWindow::saveSettings()
     settings.setValue("Col2",ui->twFileTree->columnWidth(2));
     settings.setValue("Col3",ui->twFileTree->columnWidth(3));
     settings.setValue("AddressBar",ui->tbAddressBar->isVisible());
+    settings.setValue("sortColumn",QString::number(this->sortColumn));
+    if (this->order==Qt::DescendingOrder)
+    {
+        settings.setValue("sortOrder","1");
+    }
+    else
+    {
+        settings.setValue("sortOrder","0");
+    }
     settings.endGroup();
 
     settings.beginGroup("Advanced");
@@ -650,8 +668,9 @@ void MainWindow::on_actionOptions_triggered()
 //this thing sorts the doirectories always upwards.
 void MainWindow::customSortByColumn(int column)
 {
-    Qt::SortOrder order=ui->twFileTree->header()->sortIndicatorOrder();
-    ui->twFileTree->sortItems(column,order);
+    this->sortColumn=column;
+    this->order=ui->twFileTree->header()->sortIndicatorOrder();
+    ui->twFileTree->sortItems(column,this->order);
 
     //take directories and push them to the beginning
     int q=0;
