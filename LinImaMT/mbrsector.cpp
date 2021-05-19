@@ -2,6 +2,7 @@
 #include "ui_mbrsector.h"
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QStyle>
 
 MBRSector::MBRSector(QWidget *parent, ImageFile * image, qint64 offset, int length, bool ReadOnly) :
     QDialog(parent),
