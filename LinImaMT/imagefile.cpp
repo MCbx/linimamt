@@ -278,6 +278,13 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
                 a=a.replace(" ","");
                 this->freeSpace=a.toInt();
             }
+            if (lines[4].indexOf("bytes free")>=0)
+            {
+                QString a=lines[4];
+                a=a.replace("bytes free","").trimmed();
+                a=a.replace(" ","");
+                this->freeSpace=a.toInt();
+            }
             return dirs;
         }
         status=this->execute("mdir","-/ -a \""+home+"\"",op);
@@ -319,7 +326,21 @@ QList<ImageFile::fileEntry> ImageFile::getContents(QString home)
         QString myHome;
         while (lineCount<lines.count())
         {
-            if ((lines[lineCount].length()==0)||(lines[lineCount].indexOf("files       ")>0)||(lines[lineCount].indexOf("file        ")>0) ||
+            if (lineCount+1<lines.count()) //if the next line contains "bytes free", discard current line.
+            {
+                if ((lines[lineCount+1].indexOf("bytes free")>=0)&&(lines[lineCount+1].startsWith("      ")))
+                {
+                    lineCount++;
+                    continue;
+                }
+            }
+            if ((lines[lineCount].startsWith(" "))&&(lines[lineCount].contains("files   "))&&(lines[lineCount].contains(" bytes")))
+            {
+                lineCount++;
+                continue;
+            }
+          //  if ((lines[lineCount].length()==0)||(lines[lineCount].indexOf("No files       ")>0)||(lines[lineCount].indexOf("1 file        ")>0) ||
+              if ((lines[lineCount].length()==0) ||
                     (lines[lineCount].indexOf(".            <DIR>")>=0)||
                        (lines[lineCount].indexOf("..           <DIR>")>=0))
             {
